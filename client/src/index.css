@@ -19,3 +19,48 @@ body {
   color: transparent;
 }
 
+
+.GameBox {
+  height: 70vh;
+  width: 90vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.GameRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+
+
+.GameQuestion {
+  color: aliceblue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.GameQuestion div {
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.GameQuestion input {
+  width: 100px;
+  height: 30px;
+  align-self: center;
+  align-items: center;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  padding-left: 9px;
+}
+
+
