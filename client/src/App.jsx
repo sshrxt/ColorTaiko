@@ -2,9 +2,10 @@ import { useState } from 'react';
 import InputBox from './InputBox';
 import TaikoNode from './TaikoNode';
 
+
 function App() {
   const [topRowCount, setTopRowCount] = useState(5); // X circles
-  const [bottomRowCount, setBottomRowCount] = useState(6); // Y circles
+  const [bottomRowCount, setBottomRowCount] = useState(7); // Y circles
   const [showNodes, setShowNodes] = useState(true);
 
   const createTopRow = (count) => {
@@ -23,7 +24,6 @@ function App() {
   return (
     <div style={{ textAlign: 'center' }} className='AppContainer'>
       <h1 className='title'>ColorTaiko!</h1>
-      <h3>Web version</h3>
 
       {/* InputBox Component */}
       <InputBox
