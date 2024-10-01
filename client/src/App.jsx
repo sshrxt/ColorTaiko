@@ -123,10 +123,33 @@ function App() {
     setErrorMessage('');
   };
 
+  const handleClear = () => {
+    setConnections([]);
+    setSelectedNodes([]);
+  };
+
   return (
-    <div style={{ textAlign: 'center' }} className='AppContainer'>
+    <div style={{ textAlign: 'center', position: 'relative' }} className='AppContainer'>
       <h1 className='title'>ColorTaiko!</h1>
       <h3>Web version</h3>
+
+      <button
+        onClick={handleClear}
+        style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          padding: '10px 20px',
+          fontSize: '16px',
+          backgroundColor: '#f44336',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+        }}
+      >
+        Clear
+      </button>
 
       <InputBox
         rows={topRowCount}
