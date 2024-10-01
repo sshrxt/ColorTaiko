@@ -1,15 +1,19 @@
 import React from 'react';
 
-const TaikoNode = () => {
+const TaikoNode = ({ id, onClick, isSelected }) => {
   return (
     <div
+      id={id}
+      onClick={onClick}
       style={{
         width: '30px',
         height: '30px',
         borderRadius: '50%',
-        backgroundColor: 'white', // You can change the color or make it dynamic
+        backgroundColor: isSelected ? 'yellow' : 'white',
         display: 'inline-block',
         margin: '5px',
+        cursor: 'pointer',
+        border: '2px solid black',
       }}
     />
   );
