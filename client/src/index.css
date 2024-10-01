@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Caveat:wght@400..700&display=swap');
+
 * {
   padding: 0px;
   border: 0px;
@@ -8,13 +10,14 @@ body {
   background-color: black;
   display: flex;
   justify-content: center;
+  font-family: "Caveat Brush";
 }
 
 .title {
   color: white;
   font-size: 4rem;
   margin-top: 1px;
-  background: linear-gradient(90deg, red, orange, yellow, green, rgb(69, 69, 242), rgb(147, 48, 217), violet);
+  background: linear-gradient(90deg, red, rgb(224, 177, 48), yellow, rgb(72, 156, 90), rgb(69, 69, 242), rgb(147, 48, 217), violet);
   -webkit-background-clip: text;
   color: transparent;
 }
@@ -34,14 +37,14 @@ body {
 }
 
 
-
 .GameQuestion {
   color: aliceblue;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 50px;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
+  margin-top: 10px;
   margin-bottom: 20px;
 }
 
