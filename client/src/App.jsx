@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import InputBox from './InputBox';
 import TaikoNode from './TaikoNode';
+import ErrorModal from './ErrorModal';
 
 function App() {
   const [topRowCount, setTopRowCount] = useState(5);
@@ -22,7 +23,6 @@ function App() {
         id={`top-${i}`}
         onClick={() => handleNodeClick(`top-${i}`)}
         isSelected={selectedNodes.includes(`top-${i}`)}
-        isConnected={connections.some(conn => conn.nodes.includes(`top-${i}`))}
       />
     ));
   };
@@ -34,7 +34,6 @@ function App() {
         id={`bottom-${i}`}
         onClick={() => handleNodeClick(`bottom-${i}`)}
         isSelected={selectedNodes.includes(`bottom-${i}`)}
-        isConnected={connections.some(conn => conn.nodes.includes(`bottom-${i}`))}
       />
     ));
   };
@@ -109,7 +108,7 @@ function App() {
         line.setAttribute('x2', endRect.left + endRect.width / 2 - svgRect.left);
         line.setAttribute('y2', endRect.top + endRect.height / 2 - svgRect.top);
         line.setAttribute('stroke', color);
-        line.setAttribute('stroke-width', '4'); // Increased line thickness
+        line.setAttribute('stroke-width', '4');
 
         svgRef.current.appendChild(line);
       }
@@ -137,7 +136,7 @@ function App() {
         onSubmit={handleSubmit}
       />
 
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+      <ErrorModal message={errorMessage} onClose={() => setErrorMessage('')} />
 
       {showNodes && (
         <div className="GameBox" style={{ position: 'relative' }}>
