@@ -129,7 +129,7 @@ function App() {
   };
 
   return (
-    <div style={{ textAlign: 'center', position: 'relative' }} className='AppContainer'>
+    <div style={{ textAlign: 'center', position: 'relative', fontFamily: 'Arial, sans-serif' }} className='AppContainer'>
       <h1 className='title'>ColorTaiko!</h1>
       <h3>Web version</h3>
 
@@ -146,6 +146,7 @@ function App() {
           border: 'none',
           borderRadius: '5px',
           cursor: 'pointer',
+          fontFamily: 'inherit', // This will use the font from the parent element
         }}
       >
         Clear
