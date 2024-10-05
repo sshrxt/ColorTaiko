@@ -1,19 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-const TaikoNode = ({ id, onClick, isSelected }) => {
+const TaikoNode = ({ id, onClick, isSelected, index, totalCount }) => {
+  const [entering, setEntering] = useState(true);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setEntering(false), 500); 
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const nodeSize = Math.max(30, 100 / totalCount);
+
   return (
     <div
       id={id}
       onClick={onClick}
+      className={`taiko-node ${entering ? 'taiko-node-enter' : ''}`}
       style={{
-        width: '30px',
-        height: '30px',
-        borderRadius: '50%',
         backgroundColor: isSelected ? 'yellow' : 'white',
-        display: 'inline-block',
+        width: `${nodeSize}px`,
+        height: `${nodeSize}px`,
         margin: '5px',
-        cursor: 'pointer',
-        border: '2px solid black',
       }}
     />
   );
