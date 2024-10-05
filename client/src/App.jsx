@@ -42,10 +42,12 @@ function App() {
         id={`top-${i}`}
         onClick={() => handleNodeClick(`top-${i}`)}
         isSelected={selectedNodes.includes(`top-${i}`)}
+        index={i}
+        totalCount={topRowCount}
       />
     ));
   };
-
+  
   const createBottomRow = (count) => {
     return Array.from({ length: count }, (_, i) => (
       <TaikoNode
@@ -53,9 +55,13 @@ function App() {
         id={`bottom-${i}`}
         onClick={() => handleNodeClick(`bottom-${i}`)}
         isSelected={selectedNodes.includes(`bottom-${i}`)}
+        index={i}
+        totalCount={bottomRowCount}
       />
     ));
   };
+  
+  
 
   const handleNodeClick = (nodeId) => {
     setErrorMessage('');
