@@ -14,8 +14,27 @@ function App() {
 
   useEffect(() => {
     drawConnections();
-  }, [connections]);
+  }, [connections, topRowCount, bottomRowCount]);
+  
+  useEffect(() => {
+    checkAndAddNewNodes();
+  }, [connections, topRowCount, bottomRowCount]);
+  
+  const checkAndAddNewNodes = () => {
+    const allTopNodesConnected = Array.from({ length: topRowCount }, (_, i) =>
+      connections.some(conn => conn.nodes.includes(`top-${i}`))
+    ).every(Boolean); 
+  
+    const allBottomNodesConnected = Array.from({ length: bottomRowCount }, (_, i) =>
+      connections.some(conn => conn.nodes.includes(`bottom-${i}`))
+    ).every(Boolean); 
 
+    if (allTopNodesConnected && allBottomNodesConnected) {
+      setTopRowCount(prev => prev + 2);
+      setBottomRowCount(prev => prev + 2);
+    }
+  };
+  
   const createTopRow = (count) => {
     return Array.from({ length: count }, (_, i) => (
       <TaikoNode
