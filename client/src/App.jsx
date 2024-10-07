@@ -4,8 +4,8 @@ import TaikoNode from './TaikoNode';
 import ErrorModal from './ErrorModal';
 
 function App() {
-  const [topRowCount, setTopRowCount] = useState(5);
-  const [bottomRowCount, setBottomRowCount] = useState(6);
+  const [topRowCount, setTopRowCount] = useState(1);
+  const [bottomRowCount, setBottomRowCount] = useState(1);
   const [showNodes, setShowNodes] = useState(true);
   const [selectedNodes, setSelectedNodes] = useState([]);
   const [connections, setConnections] = useState([]);
@@ -30,8 +30,8 @@ function App() {
     ).every(Boolean); 
 
     if (allTopNodesConnected && allBottomNodesConnected) {
-      setTopRowCount(prev => prev + 2);
-      setBottomRowCount(prev => prev + 2);
+      setTopRowCount(prev => prev + 1);
+      setBottomRowCount(prev => prev + 1);
     }
   };
   
@@ -176,14 +176,6 @@ function App() {
       >
         Clear
       </button>
-
-      <InputBox
-        rows={topRowCount}
-        setRows={setTopRowCount}
-        columns={bottomRowCount}
-        setColumns={setBottomRowCount}
-        onSubmit={handleSubmit}
-      />
 
       <ErrorModal message={errorMessage} onClose={() => setErrorMessage('')} />
 
