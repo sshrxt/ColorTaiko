@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Position } from 'reactflow';
+
 
 const TaikoNode = ({ id, onClick, isSelected, index, totalCount }) => {
   const [entering, setEntering] = useState(true);
