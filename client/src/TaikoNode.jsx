@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Position } from 'reactflow';
 
 const TaikoNode = ({ id, onClick, isSelected, index, totalCount }) => {
   const [entering, setEntering] = useState(true);
@@ -9,6 +10,7 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount }) => {
   }, []);
 
   const nodeSize = Math.max(30, 100 / totalCount);
+  const label = 'a${index+1}';
 
   return (
     <div
@@ -21,7 +23,11 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount }) => {
         height: `${nodeSize}px`,
         margin: '5px',
       }}
-    />
+    >
+      <span style={ {position : "absolute", frontSize: '12px'}}>
+        {label}
+      </span>
+    </div>
   );
 };
 

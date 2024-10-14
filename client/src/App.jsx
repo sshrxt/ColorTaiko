@@ -29,14 +29,19 @@ function App() {
       connections.some(conn => conn.nodes.includes(`bottom-${i}`))
     ).every(Boolean); 
 
-    if (allTopNodesConnected && allBottomNodesConnected) {
-      setTopRowCount(prev => prev + 1);
-      setBottomRowCount(prev => prev + 1);
+    if (allTopNodesConnected || allBottomNodesConnected) {
+      if(allTopNodesConnected) {
+        setTopRowCount(prev => prev + 1);
+      }
+      else {
+        setBottomRowCount(prev => prev + 1);
+      }
     }
   };
   
   const createTopRow = (count) => {
     return Array.from({ length: count }, (_, i) => (
+      <>
       <TaikoNode
         key={`top-${i}`}
         id={`top-${i}`}
@@ -45,6 +50,7 @@ function App() {
         index={i}
         totalCount={topRowCount}
       />
+      </>
     ));
   };
   
@@ -97,11 +103,11 @@ function App() {
       return;
     }
 
-    if (connections.some(conn => conn.nodes.includes(node1) || conn.nodes.includes(node2))) {
-      setErrorMessage("Can't connect to a node that's already connected.");
-      setSelectedNodes([]);
-      return;
-    }
+    // if (connections.some(conn => conn.nodes.includes(node1) || conn.nodes.includes(node2))) {
+    //   setErrorMessage("Can't connect to a node that's already connected.");
+    //   setSelectedNodes([]);
+    //   return;
+    // }
 
     const newConnection = {
       nodes: nodes,
@@ -156,7 +162,7 @@ function App() {
   return (
     <div style={{ textAlign: 'center', position: 'relative', fontFamily: 'Arial, sans-serif' }} className='AppContainer'>
       <h1 className='title'>ColorTaiko!</h1>
-      <h3>Web version</h3>
+
 
       <button
         onClick={handleClear}
