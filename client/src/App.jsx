@@ -9,10 +9,12 @@ function App() {
   const [showNodes, setShowNodes] = useState(true);
   const [selectedNodes, setSelectedNodes] = useState([]);
   const [connections, setConnections] = useState([]);
+  const [edgeState, setEdgeState] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const svgRef = useRef(null);
 
   useEffect(() => {
+    console.log("Connections updated:", connections);
     drawConnections();
   }, [connections, topRowCount, bottomRowCount]);
   
@@ -23,7 +25,7 @@ function App() {
   const checkAndAddNewNodes = () => {
     const allTopNodesConnected = Array.from({ length: topRowCount }, (_, i) =>
       connections.some(conn => conn.nodes.includes(`top-${i}`))
-    ).every(Boolean); 
+    ).every(Boolean);
   
     const allBottomNodesConnected = Array.from({ length: bottomRowCount }, (_, i) =>
       connections.some(conn => conn.nodes.includes(`bottom-${i}`))
@@ -103,17 +105,33 @@ function App() {
       return;
     }
 
-    // if (connections.some(conn => conn.nodes.includes(node1) || conn.nodes.includes(node2))) {
-    //   setErrorMessage("Can't connect to a node that's already connected.");
-    //   setSelectedNodes([]);
-    //   return;
-    // }
+    if (edgeState && (edgeState.nodes.includes(node1) || edgeState.nodes.includes(node2))) {
+      setErrorMessage("Cannot connect to a node that is already part of a pending edge.");
+      setSelectedNodes([]);
+      return;
+    }
 
-    const newConnection = {
-      nodes: nodes,
-      color: generateRandomColor()
-    };
-    setConnections([...connections, newConnection]);
+    let newColor;
+    if (edgeState) {
+      // If there is a pending edge, use the same color and create a pair
+      newColor = edgeState.color;
+      const newConnection = {
+        nodes: nodes,
+        color: newColor
+      };
+      setConnections([...connections, newConnection]);
+      setEdgeState(null);
+    } else {
+      // If no pending edge, create a new edge and add to edgeState
+      newColor = generateRandomColor();
+      const newConnection = {
+        nodes: nodes,
+        color: newColor
+      };
+      setConnections([...connections, newConnection]);
+      setEdgeState(newConnection);
+    }
+
     setSelectedNodes([]);
   };
 

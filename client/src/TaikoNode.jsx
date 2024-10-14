@@ -24,9 +24,9 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount }) => {
         margin: '5px',
       }}
     >
-      <span style={ {position : "absolute", frontSize: '12px'}}>
+      {/* <span style={ {position : "absolute", frontSize: '12px'}}>
         {label}
-      </span>
+      </span> */}
     </div>
   );
 };
