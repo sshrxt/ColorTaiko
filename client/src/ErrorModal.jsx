@@ -15,6 +15,7 @@ const ErrorModal = ({ message, onClose, titleFont }) => {
       justifyContent: 'center',
       alignItems: 'center',
       zIndex: 1000,
+      color: 'black',
     }}>
       <div style={{
         backgroundColor: 'white',

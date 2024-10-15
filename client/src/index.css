@@ -95,3 +95,7 @@ body {
   opacity: 1;
   transform: scale(1);
 }
+
+.error-container {
+  color: black;
+}

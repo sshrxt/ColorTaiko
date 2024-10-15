@@ -119,11 +119,10 @@ function App() {
     }
 
     if (
-      edgeState &&
-      (edgeState.nodes.includes(node1) || edgeState.nodes.includes(node2))
+      edgeState && (edgeState.nodes.includes(node1) || edgeState.nodes.includes(node2))
     ) {
       setErrorMessage(
-        "Cannot connect to a node that is already part of a pending edge."
+        "Two vertical edges in each pair should not share a common vertex"
       );
       setSelectedNodes([]);
       return;
@@ -269,8 +268,8 @@ function App() {
  
           const controlX = (startX + endX) / 2;
           const controlY = isTopCurve 
-            ? Math.min(startY, endY) - (distance / 3) 
-            : Math.max(startY, endY) + (distance / 3); 
+            ? Math.min(startY, endY) - (distance / 5) 
+            : Math.max(startY, endY) + (distance / 5); 
     
           const path = document.createElementNS(
             "http://www.w3.org/2000/svg",
@@ -319,6 +318,9 @@ function App() {
     setSelectedNodes([]);
     setBottomRowCount(1);
     setTopRowCount(1);
+    setEdgeState(null);
+    setErrorMessage("");
+    console.log(connectionPairs);
   };
 
   return (
@@ -351,7 +353,7 @@ function App() {
         Clear
       </button>
 
-      <ErrorModal message={errorMessage} onClose={() => setErrorMessage("")} />
+      <ErrorModal className = "error-container" message={errorMessage} onClose={() => setErrorMessage("")} />
 
       {showNodes && (
         <div className="GameBox" style={{ position: "relative" }}>
