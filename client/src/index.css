@@ -17,12 +17,8 @@ body {
 }
 
 .title {
-  color: white;
   font-size: 4rem;
   margin-top: 10px;
-  background: linear-gradient(90deg, red, rgb(224, 177, 48), yellow, rgb(72, 156, 90), rgb(69, 69, 242), rgb(147, 48, 217), violet);
-  -webkit-background-clip: text;
-  color: transparent;
 }
 
 
@@ -83,6 +79,7 @@ body {
   cursor: pointer;
   border: 2px solid black;
   transition: all 0.5s ease;
+  z-index: 1;
 }
 
 .taiko-node-enter {
