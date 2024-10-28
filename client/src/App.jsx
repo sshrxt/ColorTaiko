@@ -267,9 +267,7 @@ function App() {
     
  
           const controlX = (startX + endX) / 2;
-          const controlY = isTopCurve 
-            ? Math.min(startY, endY) - (distance / 5) 
-            : Math.max(startY, endY) + (distance / 5); 
+          const controlY = isTopCurve ? Math.min(startY, endY) - (distance / 5) : Math.max(startY, endY) + (distance / 5); 
     
           const path = document.createElementNS(
             "http://www.w3.org/2000/svg",
