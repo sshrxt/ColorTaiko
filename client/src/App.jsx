@@ -4,6 +4,8 @@ import TaikoNode from "./TaikoNode";
 import ErrorModal from "./ErrorModal";
 import LargeArcEdge from "./LargeArcEdge";
 
+
+
 const edgeTypes = {
   custom: LargeArcEdge, // Register custom arc edge type
 };
@@ -183,6 +185,7 @@ function App() {
     line.setAttribute("fill", "none");
     line.setAttribute("stroke-width", "4");
 
+
     svgRef.current.appendChild(line);
   };
 
@@ -233,6 +236,7 @@ function App() {
         line.setAttribute("y2", endY);
         line.setAttribute("stroke", color);
         line.setAttribute("stroke-width", "4");
+        line.setAttribute("stroke-linecap", "round");
   
         svgRef.current.appendChild(line);
       }
@@ -284,6 +288,7 @@ function App() {
           path.setAttribute("stroke", color);
           path.setAttribute("fill", "none");
           path.setAttribute("stroke-width", "4");
+          path.setAttribute("stroke-linecap", "round");
   
           return path;
         };
@@ -335,7 +340,21 @@ function App() {
       }}
       className="AppContainer"
     >
-      <h1 className="title">ColorTaiko!</h1>
+      <a href="https://mineyev.web.illinois.edu/ColorTaiko!/" target="_blank">
+        <h1 className="title">
+          <span style={{ color: '#e6194b', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>C</span>
+          <span style={{ color: '#3cb44b', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
+          <span style={{ color: '#ffe119', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>l</span>
+          <span style={{ color: '#f58231', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
+          <span style={{ color: '#dcbeff', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>r</span>
+          <span style={{ color: '#9a6324', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>T</span>
+          <span style={{ color: '#fabebe', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>a</span>
+          <span style={{ color: '#7f00ff', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>i</span>
+          <span style={{ color: '#f032e6', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>k</span>
+          <span style={{ color: '#42d4f4', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
+          <span style={{ color: '#bfef45', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>!</span>
+        </h1>
+      </a>
 
       <button
         onClick={handleClear}
