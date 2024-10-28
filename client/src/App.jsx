@@ -290,20 +290,11 @@ function App() {
           const distance = Math.sqrt(dx * dx + dy * dy);
   
           const controlX = (startX + endX) / 2;
-<<<<<<< HEAD
-          const controlY = isTopCurve ? Math.min(startY, endY) - (distance / 5) : Math.max(startY, endY) + (distance / 5); 
-    
-          const path = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "path"
-          );
-=======
           const controlY = isTopCurve 
             ? Math.min(startY, endY) - (distance / 5)
             : Math.max(startY, endY) + (distance / 5);
   
           const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
->>>>>>> 78048c77715a3dfe70001778aacf244ad2bc9394
           const d = `M ${startX},${startY} Q ${controlX},${controlY} ${endX},${endY}`;
           path.setAttribute("d", d);
           path.setAttribute("stroke", color);
