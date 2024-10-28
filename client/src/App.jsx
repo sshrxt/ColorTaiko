@@ -118,6 +118,18 @@ function App() {
       return;
     }
 
+    const isDuplicate = connections.some(
+      (conn) =>
+        (conn.nodes.includes(node1) && conn.nodes.includes(node2)) ||
+        (conn.nodes.includes(node2) && conn.nodes.includes(node1))
+    );
+  
+    if (isDuplicate) {
+      setErrorMessage("These nodes are already connected.");
+      setSelectedNodes([]);
+      return;
+    }
+
     if (
       edgeState && (edgeState.nodes.includes(node1) || edgeState.nodes.includes(node2))
     ) {
