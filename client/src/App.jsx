@@ -4,7 +4,9 @@ import TaikoNode from "./TaikoNode";
 import ErrorModal from "./ErrorModal";
 import LargeArcEdge from "./LargeArcEdge";
 
-
+import clickSound from "./assets/sound effect/Click.wav";
+import errorSound from "./assets/sound effect/Error.wav";
+import connectSound from "./assets/sound effect/Connection.wav";
 
 const edgeTypes = {
   custom: LargeArcEdge, // Register custom arc edge type
@@ -19,7 +21,18 @@ function App() {
   const [edgeState, setEdgeState] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const svgRef = useRef(null);
+
+  const [progress, setProgress] = useState(0);
+
+  const clickAudio = new Audio(clickSound);
+  const errorAudio = new Audio(errorSound);
+  const connectAudio = new Audio(connectSound);
+
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
   const [currentColor, setCurrentColor] = useState(0);
+
 
   // store the pair of edges
   const [connectionPairs, setConnectionPairs] = useState([]);
@@ -86,6 +99,7 @@ function App() {
 
   const handleNodeClick = (nodeId) => {
     setErrorMessage("");
+    connectAudio.play();
     if (selectedNodes.includes(nodeId)) {
       setSelectedNodes(selectedNodes.filter((id) => id !== nodeId));
     } else {
@@ -148,6 +162,7 @@ function App() {
       (isTopNode(node1) && isTopNode(node2)) ||
       (isBottomNode(node1) && isBottomNode(node2))
     ) {
+      errorAudio.play();
       setErrorMessage("Can't connect two nodes from the same row.");
       setSelectedNodes([]);
       return;
@@ -160,6 +175,7 @@ function App() {
     );
   
     if (isDuplicate) {
+      errorAudio.play();
       setErrorMessage("These nodes are already connected.");
       setSelectedNodes([]);
       return;
@@ -168,6 +184,7 @@ function App() {
     if (
       edgeState && (edgeState.nodes.includes(node1) || edgeState.nodes.includes(node2))
     ) {
+      errorAudio.play();
       setErrorMessage(
         "Two vertical edges in each pair should not share a common vertex"
       );
@@ -374,10 +391,35 @@ function App() {
     setTopRowCount(1);
     setEdgeState(null);
     setErrorMessage("");
+    setProgress(0);
     console.log(connectionPairs);
   };
+  
+  const calculateProgress = () => {
+    let totalPossibleConnections = (topRowCount - 1) *  (bottomRowCount - 1);
+    if (totalPossibleConnections % 2 !== 0) {
+      totalPossibleConnections -= 1;
+    }
+    const verticalEdges = connections.length;
+    const progressPercentage = totalPossibleConnections > 4 ? (verticalEdges / totalPossibleConnections) * 100 : 0;
+    setProgress(progressPercentage);
+  };
+
+  const showTooltip = (e) => {
+    setTooltipVisible(true);
+    setTooltipPosition({ x: e.clientX, y: e.clientY });
+  };
+
+  const hideTooltip = () => {
+    setTooltipVisible(false);
+  };
+
+  useEffect(() => {
+    calculateProgress();
+  }, [connections, topRowCount, bottomRowCount]);
 
   return (
+    
     <div
       style={{
         textAlign: "center",
@@ -386,21 +428,43 @@ function App() {
       }}
       className="AppContainer"
     >
-      <a href="https://mineyev.web.illinois.edu/ColorTaiko!/" target="_blank">
-        <h1 className="title">
-          <span style={{ color: '#e6194b', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>C</span>
-          <span style={{ color: '#3cb44b', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
-          <span style={{ color: '#ffe119', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>l</span>
-          <span style={{ color: '#f58231', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
-          <span style={{ color: '#dcbeff', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>r</span>
-          <span style={{ color: '#9a6324', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>T</span>
-          <span style={{ color: '#fabebe', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>a</span>
-          <span style={{ color: '#7f00ff', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>i</span>
-          <span style={{ color: '#f032e6', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>k</span>
-          <span style={{ color: '#42d4f4', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
-          <span style={{ color: '#bfef45', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>!</span>
-        </h1>
+    <h1 className="title">
+      <a href="https://mineyev.web.illinois.edu/ColorTaiko!/" target="_blank" style={{ textDecoration: "none" }}>
+        <span style={{ color: '#e6194b', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>C</span>
+        <span style={{ color: '#3cb44b', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
+        <span style={{ color: '#ffe119', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>l</span>
+        <span style={{ color: '#f58231', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
+        <span style={{ color: '#dcbeff', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>r</span>
+        <span style={{ color: '#9a6324', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>T</span>
+        <span style={{ color: '#fabebe', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>a</span>
+        <span style={{ color: '#7f00ff', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>i</span>
+        <span style={{ color: '#f032e6', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>k</span>
+        <span style={{ color: '#42d4f4', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
+        <span style={{ color: '#bfef45', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>!</span>
       </a>
+    </h1>
+
+      <div
+        className="progress-bar-container"
+        onMouseEnter={showTooltip}
+        onMouseMove={showTooltip}
+        onMouseLeave={hideTooltip}
+      >
+        <div className="progress-bar-fill" style={{ width: `${progress}%` }}>
+          <span className="progress-bar-text">{Math.round(progress)}%</span>
+        </div>
+      </div>
+
+      {tooltipVisible && (
+        <div
+          className="tooltip"
+          style={{ top: tooltipPosition.y + 10, left: tooltipPosition.x + 10 }}
+        >
+          <p>Vertical Edges: {connections.length}</p>
+          <p>Top Nodes: {topRowCount - 1}</p>
+          <p>Bottom Nodes: {bottomRowCount - 1}</p>
+        </div>
+      )}
 
       <button
         onClick={handleClear}
