@@ -19,6 +19,8 @@ function App() {
   const [edgeState, setEdgeState] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const svgRef = useRef(null);
+  const [progress, setProgress] = useState(0);
+
 
   // store the pair of edges
   const [connectionPairs, setConnectionPairs] = useState([]);
@@ -340,10 +342,26 @@ function App() {
     setTopRowCount(1);
     setEdgeState(null);
     setErrorMessage("");
+    setProgress(0);
     console.log(connectionPairs);
   };
+  
+  const calculateProgress = () => {
+    let totalPossibleConnections = (topRowCount - 1) *  (bottomRowCount - 1);
+    if (totalPossibleConnections % 2 !== 0) {
+      totalPossibleConnections -= 1;
+    }
+    const verticalEdges = connections.length;
+    const progressPercentage = totalPossibleConnections > 4 ? (verticalEdges / totalPossibleConnections) * 100 : 0;
+    setProgress(progressPercentage);
+  };
+
+  useEffect(() => {
+    calculateProgress();
+  }, [connections, topRowCount, bottomRowCount]);
 
   return (
+    
     <div
       style={{
         textAlign: "center",
@@ -352,21 +370,27 @@ function App() {
       }}
       className="AppContainer"
     >
-      <a href="https://mineyev.web.illinois.edu/ColorTaiko!/" target="_blank">
-        <h1 className="title">
-          <span style={{ color: '#e6194b', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>C</span>
-          <span style={{ color: '#3cb44b', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
-          <span style={{ color: '#ffe119', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>l</span>
-          <span style={{ color: '#f58231', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
-          <span style={{ color: '#dcbeff', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>r</span>
-          <span style={{ color: '#9a6324', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>T</span>
-          <span style={{ color: '#fabebe', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>a</span>
-          <span style={{ color: '#7f00ff', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>i</span>
-          <span style={{ color: '#f032e6', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>k</span>
-          <span style={{ color: '#42d4f4', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
-          <span style={{ color: '#bfef45', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>!</span>
-        </h1>
+    <h1 className="title">
+      <a href="https://mineyev.web.illinois.edu/ColorTaiko!/" target="_blank" style={{ textDecoration: "none" }}>
+        <span style={{ color: '#e6194b', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>C</span>
+        <span style={{ color: '#3cb44b', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
+        <span style={{ color: '#ffe119', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>l</span>
+        <span style={{ color: '#f58231', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
+        <span style={{ color: '#dcbeff', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>r</span>
+        <span style={{ color: '#9a6324', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>T</span>
+        <span style={{ color: '#fabebe', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>a</span>
+        <span style={{ color: '#7f00ff', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>i</span>
+        <span style={{ color: '#f032e6', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>k</span>
+        <span style={{ color: '#42d4f4', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
+        <span style={{ color: '#bfef45', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>!</span>
       </a>
+    </h1>
+
+    <div className="progress-bar-container">
+        <div className="progress-bar-fill" style={{ width: `${progress}%` }}>
+          <span className="progress-bar-text">{Math.round(progress)}%</span>
+        </div>
+    </div>
 
       <button
         onClick={handleClear}
