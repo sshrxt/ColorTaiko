@@ -75,7 +75,7 @@ function App() {
     if (latestPair && latestPair.length === 2) {
       checkAndGroupConnections(latestPair);
     }
-  }, [connectionPairs]);
+  }, [connectionPairs, connections]);
 
   const checkAndAddNewNodes = () => {
     const allTopNodesConnected = Array.from({ length: topRowCount }, (_, i) =>
@@ -448,17 +448,17 @@ function App() {
     const topCombination = [top1, top2].sort().join(",");
     const bottomCombination = [bottom1, bottom2].sort().join(",");
 
-  // Find all matching targetGroups
-  let matchingGroups = [];
-  console.log("Matching Groups:", matchingGroups);
-  groupMapRef.current.forEach((group, key) => {
-      if (key === topCombination || key === bottomCombination) {
-          matchingGroups.push(group);
-      }
-  });
+    // Find all matching targetGroups
+    let matchingGroups = [];
+    console.log("Matching Groups:", matchingGroups);
+    groupMapRef.current.forEach((group, key) => {
+        if (key === topCombination || key === bottomCombination) {
+            matchingGroups.push(group);
+        }
+    });
 
-  let mergedGroup = null;
-  if (matchingGroups.length > 0) {
+    let mergedGroup = null;
+    if (matchingGroups.length > 0) {
       // If multiple matching groups are found, merge them
       mergedGroup = matchingGroups[0];
 
