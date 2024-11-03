@@ -4,6 +4,9 @@ import TaikoNode from "./TaikoNode";
 import ErrorModal from "./ErrorModal";
 import LargeArcEdge from "./LargeArcEdge";
 
+import { generateColor } from './utils/colorUtils';
+
+
 import clickSound from "./assets/sound effect/Click.wav";
 import errorSound from "./assets/sound effect/Error.wav";
 import connectSound from "./assets/sound effect/Connection.wav";
@@ -140,44 +143,6 @@ function App() {
     }
   };
 
-  const generateColor = () => {
-    // const hue = Math.floor(Math.random() * 360); // Hue ranges from 0 to 360
-    // const saturation = Math.floor(Math.random() * 100) + 50; // Saturation ranges from 50% to 100%
-    // const lightness = Math.floor(Math.random() * 20) + 30; // Lightness ranges from 30% to 50%
-    
-    const colors = [];
-    colors.push('#e6194b'); // red
-    colors.push('#ffffff'); // black
-    colors.push('#a9a9a9'); // grey
-    colors.push('#3cb44b'); // green
-    colors.push('#ffe119'); // yellow
-    colors.push('#f58231'); // orange
-    colors.push('#dcbeff'); // lavender
-    colors.push('#9a6324'); // brown
-    colors.push('#fabebe'); // pink
-    colors.push('#7f00ff'); // violet
-    colors.push('#f032e6'); // magenta
-    colors.push('#42d4f4'); // cyan
-    colors.push('#800000'); // maroon
-    colors.push('#469990'); // teal
-    colors.push('#bfef45'); // lime
-    colors.push('#808000'); // olive
-    colors.push('#ffd8b1'); // apricot
-    colors.push('#aaffc3'); // mint
-    colors.push('#c8ad7f'); // beige
-    colors.push('#4363d8'); // blue
-    colors.push('#4b0082'); // indigo
-
-    let temp = currentColor;
-    setCurrentColor(temp + 1);
-
-    if (currentColor == 19) {
-      temp = 0;
-      setCurrentColor(0);
-    }
-    return colors[temp];
-
-  };
   
 
   const tryConnect = (nodes) => {
@@ -246,7 +211,8 @@ function App() {
       setEdgeState(null);
     } else {
       // If no pending edge, create a new edge and add to edgeState
-      newColor = generateColor();
+      newColor = generateColor(currentColor, setCurrentColor);
+      console.log("newColor: ", newColor);
       //console.log(newColor);
       const newConnection = {
         nodes: nodes,
@@ -412,6 +378,7 @@ function App() {
     setErrorMessage("");
     setProgress(0);
     setConnectionGroups([]);
+    setCurrentColor(0);
     groupMap.clear();
     console.log(connectionPairs);
   };
