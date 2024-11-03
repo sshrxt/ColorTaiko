@@ -37,18 +37,45 @@ function App() {
   // store the pair of edges
   const [connectionPairs, setConnectionPairs] = useState([]);
 
+  const [connectionGroups, setConnectionGroups] = useState([]);
+  const groupMapRef = useRef(new Map());
+
+
   useEffect(() => {
     // console.log("Connections updated:", connections);
     drawConnections();
-  }, [connections, topRowCount, bottomRowCount]);
+  }, [connections, topRowCount, bottomRowCount, connectionPairs, connectionGroups, groupMapRef]);
 
   useEffect(() => {
     checkAndAddNewNodes();
   }, [connections, topRowCount, bottomRowCount]);
 
   useEffect(() => {
-    console.log("CONNECTION PAIRS:", connectionPairs);
+    //console.log("CONNECTION PAIRS:", connectionPairs);
   }, [connectionPairs]);
+
+  useEffect(() => {
+    calculateProgress();
+  }, [connections, topRowCount, bottomRowCount]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      drawConnections(); 
+    };
+  
+    window.addEventListener('resize', handleResize);
+  
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [connections, connectionPairs]);
+
+  useEffect(() => {
+    const latestPair = connectionPairs[connectionPairs.length - 1];
+    if (latestPair && latestPair.length === 2) {
+      checkAndGroupConnections(latestPair);
+    }
+  }, [connectionPairs, connections]);
 
   const checkAndAddNewNodes = () => {
     const allTopNodesConnected = Array.from({ length: topRowCount }, (_, i) =>
@@ -154,6 +181,7 @@ function App() {
   
 
   const tryConnect = (nodes) => {
+    if (nodes.length !== 2) return;
     const [node1, node2] = nodes;
     const isTopNode = (id) => id.startsWith("top");
     const isBottomNode = (id) => id.startsWith("bottom");
@@ -203,19 +231,22 @@ function App() {
       setConnections([...connections, newConnection]);
       setConnectionPairs((prevPairs) => {
         const lastPair = prevPairs[prevPairs.length - 1];
+        let updatedPairs;
         if (lastPair && lastPair.length === 1) {
           // If the last pair has one connection, complete it
-          return [...prevPairs.slice(0, -1), [...lastPair, newConnection]];
+          updatedPairs = [...prevPairs.slice(0, -1), [...lastPair, newConnection]];
         } else {
           // Otherwise, create a new pair
-          return [...prevPairs, [edgeState, newConnection]];
+          updatedPairs = [...prevPairs, [edgeState, newConnection]];
         }
+        return updatedPairs;
+  
       });
       setEdgeState(null);
     } else {
       // If no pending edge, create a new edge and add to edgeState
       newColor = generateColor();
-      console.log(newColor);
+      //console.log(newColor);
       const newConnection = {
         nodes: nodes,
         color: newColor,
@@ -225,7 +256,6 @@ function App() {
       setConnectionPairs([...connectionPairs, [newConnection]]);
       setEdgeState(newConnection);
     }
-
     setSelectedNodes([]);
   };
 
@@ -251,18 +281,6 @@ function App() {
 
     svgRef.current.appendChild(line);
   };
-
-  useEffect(() => {
-    const handleResize = () => {
-      drawConnections(); 
-    };
-  
-    window.addEventListener('resize', handleResize);
-  
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [connections, connectionPairs]);
 
   const drawConnections = () => {
     if (!svgRef.current) return;
@@ -392,6 +410,8 @@ function App() {
     setEdgeState(null);
     setErrorMessage("");
     setProgress(0);
+    setConnectionGroups([]);
+    groupMap.clear();
     console.log(connectionPairs);
   };
   
@@ -414,9 +434,97 @@ function App() {
     setTooltipVisible(false);
   };
 
+
   useEffect(() => {
-    calculateProgress();
-  }, [connections, topRowCount, bottomRowCount]);
+    console.log("Updated Connection Groups:", connectionGroups);
+  }, [connectionGroups]);
+
+  const checkAndGroupConnections = (newPair) => {
+
+    const [firstConnection, secondConnection] = newPair;
+    const [top1, bottom1] = firstConnection.nodes;
+    const [top2, bottom2] = secondConnection.nodes;
+
+    const topCombination = [top1, top2].sort().join(",");
+    const bottomCombination = [bottom1, bottom2].sort().join(",");
+
+    // Find all matching targetGroups
+    let matchingGroups = [];
+    console.log("Matching Groups:", matchingGroups);
+    groupMapRef.current.forEach((group, key) => {
+        if (key === topCombination || key === bottomCombination) {
+            matchingGroups.push(group);
+        }
+    });
+
+    let mergedGroup = null;
+    if (matchingGroups.length > 0) {
+      // If multiple matching groups are found, merge them
+      mergedGroup = matchingGroups[0];
+
+      // Merge newPair into mergedGroup
+      newPair.forEach((connection) => {
+          if (connection.color !== mergedGroup.color) {
+              connection.color = mergedGroup.color;
+          }
+          if (!mergedGroup.pairs.includes(connection)) {
+              mergedGroup.pairs.push(connection);
+          }
+      });
+
+      mergedGroup.nodes = Array.from(
+          new Set([...mergedGroup.nodes, top1, top2, bottom1, bottom2])
+      );
+
+      // Merge all other matching groups into mergedGroup
+      for (let i = 1; i < matchingGroups.length; i++) {
+          const groupToMerge = matchingGroups[i];
+          mergedGroup.nodes = Array.from(
+              new Set([...mergedGroup.nodes, ...groupToMerge.nodes])
+          );
+          mergedGroup.pairs = Array.from(
+              new Set([...mergedGroup.pairs, ...groupToMerge.pairs])
+          );
+      }
+
+      // Remove old group keys
+      groupMapRef.current.forEach((group, key) => {
+          if (matchingGroups.includes(group) && group !== mergedGroup) {
+              groupMapRef.current.delete(key);
+          }
+      });
+
+      // Update combination keys to the merged group
+      groupMapRef.current.set(topCombination, mergedGroup);
+      groupMapRef.current.set(bottomCombination, mergedGroup);
+
+      console.log("Merged Group:", mergedGroup);
+      console.log("GroupMap", groupMapRef.current);
+
+  } else {
+      // If no matching groups are found, create a new group
+      const groupColor = firstConnection.color;
+      newPair.forEach((connection) => (connection.color = groupColor));
+      const newGroup = {
+          nodes: [top1, top2, bottom1, bottom2],
+          pairs: [...newPair],
+          color: groupColor,
+      };
+
+      // Add to groupMap
+      groupMapRef.current.set(topCombination, newGroup);
+      groupMapRef.current.set(bottomCombination, newGroup);
+
+      // Update connection groups state
+      setConnectionGroups((prevGroups) => [...prevGroups, newGroup]);
+
+        //console.log("New Group Added:", newGroup);
+        //console.log("Connection Pairs:", connectionPairs);
+    }
+
+};
+
+
 
   return (
     
