@@ -211,6 +211,7 @@ function App() {
           return [...prevPairs, [edgeState, newConnection]];
         }
       });
+      console.log(connectionPairs);
       setEdgeState(null);
     } else {
       // If no pending edge, create a new edge and add to edgeState
