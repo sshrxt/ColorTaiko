@@ -4,6 +4,12 @@ import TaikoNode from "./TaikoNode";
 import ErrorModal from "./ErrorModal";
 import LargeArcEdge from "./LargeArcEdge";
 
+import { generateColor } from './utils/colorUtils';
+import { drawConnections } from "./utils/drawingUtils"; 
+import { checkAndGroupConnections } from "./utils/MergeUtils"; 
+
+
+
 import clickSound from "./assets/sound effect/Click.wav";
 import errorSound from "./assets/sound effect/Error.wav";
 import connectSound from "./assets/sound effect/Connection.wav";
@@ -42,9 +48,8 @@ function App() {
 
 
   useEffect(() => {
-    // console.log("Connections updated:", connections);
-    drawConnections();
-  }, [connections, topRowCount, bottomRowCount, connectionPairs, connectionGroups, groupMapRef]);
+    drawConnections(svgRef, connections, connectionPairs);
+  }, [connectionGroups, connections, topRowCount, bottomRowCount, connectionPairs]);
 
   useEffect(() => {
     checkAndAddNewNodes();
@@ -60,7 +65,7 @@ function App() {
 
   useEffect(() => {
     const handleResize = () => {
-      drawConnections(); 
+      drawConnections(svgRef, connections, connectionPairs); // Pass parameters
     };
   
     window.addEventListener('resize', handleResize);
@@ -68,14 +73,22 @@ function App() {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [connections, connectionPairs]);
+  }, [svgRef, connections, connectionPairs]); // Add svgRef to dependencies
+  
 
   useEffect(() => {
     const latestPair = connectionPairs[connectionPairs.length - 1];
     if (latestPair && latestPair.length === 2) {
-      checkAndGroupConnections(latestPair);
+      checkAndGroupConnections(
+        latestPair,
+        groupMapRef,
+        setConnectionGroups,
+        connections,
+        setConnections
+      );
     }
-  }, [connectionPairs, connections]);
+  }, [connectionPairs]);
+  
 
   const checkAndAddNewNodes = () => {
     const allTopNodesConnected = Array.from({ length: topRowCount }, (_, i) =>
@@ -140,44 +153,6 @@ function App() {
     }
   };
 
-  const generateColor = () => {
-    // const hue = Math.floor(Math.random() * 360); // Hue ranges from 0 to 360
-    // const saturation = Math.floor(Math.random() * 100) + 50; // Saturation ranges from 50% to 100%
-    // const lightness = Math.floor(Math.random() * 20) + 30; // Lightness ranges from 30% to 50%
-    
-    const colors = [];
-    colors.push('#e6194b'); // red
-    colors.push('#ffffff'); // black
-    colors.push('#a9a9a9'); // grey
-    colors.push('#3cb44b'); // green
-    colors.push('#ffe119'); // yellow
-    colors.push('#f58231'); // orange
-    colors.push('#dcbeff'); // lavender
-    colors.push('#9a6324'); // brown
-    colors.push('#fabebe'); // pink
-    colors.push('#7f00ff'); // violet
-    colors.push('#f032e6'); // magenta
-    colors.push('#42d4f4'); // cyan
-    colors.push('#800000'); // maroon
-    colors.push('#469990'); // teal
-    colors.push('#bfef45'); // lime
-    colors.push('#808000'); // olive
-    colors.push('#ffd8b1'); // apricot
-    colors.push('#aaffc3'); // mint
-    colors.push('#c8ad7f'); // beige
-    colors.push('#4363d8'); // blue
-    colors.push('#4b0082'); // indigo
-
-    let temp = currentColor;
-    setCurrentColor(temp + 1);
-
-    if (currentColor == 19) {
-      temp = 0;
-      setCurrentColor(0);
-    }
-    return colors[temp];
-
-  };
   
 
   const tryConnect = (nodes) => {
@@ -246,7 +221,8 @@ function App() {
       setEdgeState(null);
     } else {
       // If no pending edge, create a new edge and add to edgeState
-      newColor = generateColor();
+      newColor = generateColor(currentColor, setCurrentColor);
+      console.log("newColor: ", newColor);
       //console.log(newColor);
       const newConnection = {
         nodes: nodes,
@@ -259,140 +235,6 @@ function App() {
     }
     setSelectedNodes([]);
   };
-
-  const drawArc = (startRect, endRect, svgRect, color, arcHeight) => {
-    const midX = (startRect.left + endRect.left) / 2;
-    const startY = startRect.top + startRect.height / 2 - svgRect.top;
-    const endY = endRect.top + endRect.height / 2 - svgRect.top;
-
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
-
-    // Modify arcHeight: negative for upward arc, positive for downward arc
-    const d = `
-      M ${startRect.left + startRect.width / 2 - svgRect.left}, ${startY} 
-      C ${midX}, ${startY + arcHeight} ${midX}, ${endY + arcHeight} 
-      ${endRect.left + endRect.width / 2 - svgRect.left}, ${endY}
-    `;
-
-    line.setAttribute("d", d.trim());
-    line.setAttribute("stroke", color);
-    line.setAttribute("fill", "none");
-    line.setAttribute("stroke-width", "4");
-
-
-    svgRef.current.appendChild(line);
-  };
-
-  const drawConnections = () => {
-    if (!svgRef.current) return;
-  
-    // Clear existing lines and curves
-    while (svgRef.current.firstChild) {
-      svgRef.current.removeChild(svgRef.current.firstChild);
-    }
-  
-    // Get the latest SVG container position and size
-    const svgRect = svgRef.current.getBoundingClientRect();
-  
-    // Draw straight line connections
-    connections.forEach(({ nodes: [start, end], color }) => {
-      const startElement = document.getElementById(start);
-      const endElement = document.getElementById(end);
-  
-      if (startElement && endElement) {
-        // Get the latest node positions
-        const startRect = startElement.getBoundingClientRect();
-        const endRect = endElement.getBoundingClientRect();
-  
-        // Calculate the start and end points of the line
-        const startX = startRect.left + startRect.width / 2 - svgRect.left;
-        const startY = startRect.top + startRect.height / 2 - svgRect.top;
-        const endX = endRect.left + endRect.width / 2 - svgRect.left;
-        const endY = endRect.top + endRect.height / 2 - svgRect.top;
-  
-        // Create a straight line
-        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        line.setAttribute("x1", startX);
-        line.setAttribute("y1", startY);
-        line.setAttribute("x2", endX);
-        line.setAttribute("y2", endY);
-        line.setAttribute("stroke", color);
-        line.setAttribute("stroke-width", "4");
-        line.setAttribute("stroke-linecap", "round");
-  
-        svgRef.current.appendChild(line);
-      }
-    });
-  
-    // Draw curved connections
-    connectionPairs.forEach((pair) => {
-      if (pair.length === 2) {
-        const [
-          {
-            nodes: [startNode1, bottomNode1],
-          },
-          {
-            nodes: [startNode2, bottomNode2],
-            color,
-          },
-        ] = pair;
-  
-        // Determine if the node is top or bottom
-        const topFirst1 = !startNode1.startsWith("bottom");
-        const topFirst2 = !startNode2.startsWith("bottom");
-  
-        // Function to create a curved path
-        const createCurvedPath = (startNode, endNode, isTopCurve) => {
-          const startElement = document.getElementById(startNode);
-          const endElement = document.getElementById(endNode);
-          if (!startElement || !endElement) return null; // Ensure nodes exist
-  
-          const startRect = startElement.getBoundingClientRect();
-          const endRect = endElement.getBoundingClientRect();
-  
-          const startX = startRect.left + startRect.width / 2 - svgRect.left;
-          const startY = startRect.top + startRect.height / 2 - svgRect.top;
-          const endX = endRect.left + endRect.width / 2 - svgRect.left;
-          const endY = endRect.top + endRect.height / 2 - svgRect.top;
-  
-          const dx = endX - startX;
-          const dy = endY - startY;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-  
-          const controlX = (startX + endX) / 2;
-          const controlY = isTopCurve 
-            ? Math.min(startY, endY) - (distance / 5)
-            : Math.max(startY, endY) + (distance / 5);
-  
-          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          const d = `M ${startX},${startY} Q ${controlX},${controlY} ${endX},${endY}`;
-          path.setAttribute("d", d);
-          path.setAttribute("stroke", color);
-          path.setAttribute("fill", "none");
-          path.setAttribute("stroke-width", "4");
-          path.setAttribute("stroke-linecap", "round");
-  
-          return path;
-        };
-  
-        // Draw the top and bottom curves
-        const topCurve = createCurvedPath(
-          topFirst1 ? startNode1 : bottomNode1,
-          topFirst2 ? startNode2 : bottomNode2,
-          true // Top curve
-        );
-        if (topCurve) svgRef.current.appendChild(topCurve);
-  
-        const bottomCurve = createCurvedPath(
-          topFirst1 ? bottomNode1 : startNode1,
-          topFirst2 ? bottomNode2 : startNode2,
-          false // Bottom curve
-        );
-        if (bottomCurve) svgRef.current.appendChild(bottomCurve);
-      }
-    });
-  };
-  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -412,7 +254,8 @@ function App() {
     setErrorMessage("");
     setProgress(0);
     setConnectionGroups([]);
-    groupMap.clear();
+    setCurrentColor(0);
+    groupMapRef.current.clear();
     console.log(connectionPairs);
   };
   
@@ -439,91 +282,6 @@ function App() {
   useEffect(() => {
     console.log("Updated Connection Groups:", connectionGroups);
   }, [connectionGroups]);
-
-  const checkAndGroupConnections = (newPair) => {
-
-    const [firstConnection, secondConnection] = newPair;
-    const [top1, bottom1] = firstConnection.nodes;
-    const [top2, bottom2] = secondConnection.nodes;
-
-    const topCombination = [top1, top2].sort().join(",");
-    const bottomCombination = [bottom1, bottom2].sort().join(",");
-
-    // Find all matching targetGroups
-    let matchingGroups = [];
-    console.log("Matching Groups:", matchingGroups);
-    groupMapRef.current.forEach((group, key) => {
-        if (key === topCombination || key === bottomCombination) {
-            matchingGroups.push(group);
-        }
-    });
-
-    let mergedGroup = null;
-    if (matchingGroups.length > 0) {
-      // If multiple matching groups are found, merge them
-      mergedGroup = matchingGroups[0];
-
-      // Merge newPair into mergedGroup
-      newPair.forEach((connection) => {
-          if (connection.color !== mergedGroup.color) {
-              connection.color = mergedGroup.color;
-          }
-          if (!mergedGroup.pairs.includes(connection)) {
-              mergedGroup.pairs.push(connection);
-          }
-      });
-
-      mergedGroup.nodes = Array.from(
-          new Set([...mergedGroup.nodes, top1, top2, bottom1, bottom2])
-      );
-
-      // Merge all other matching groups into mergedGroup
-      for (let i = 1; i < matchingGroups.length; i++) {
-          const groupToMerge = matchingGroups[i];
-          mergedGroup.nodes = Array.from(
-              new Set([...mergedGroup.nodes, ...groupToMerge.nodes])
-          );
-          mergedGroup.pairs = Array.from(
-              new Set([...mergedGroup.pairs, ...groupToMerge.pairs])
-          );
-      }
-
-      // Remove old group keys
-      groupMapRef.current.forEach((group, key) => {
-          if (matchingGroups.includes(group) && group !== mergedGroup) {
-              groupMapRef.current.delete(key);
-          }
-      });
-
-      // Update combination keys to the merged group
-      groupMapRef.current.set(topCombination, mergedGroup);
-      groupMapRef.current.set(bottomCombination, mergedGroup);
-
-      console.log("Merged Group:", mergedGroup);
-      console.log("GroupMap", groupMapRef.current);
-
-  } else {
-      // If no matching groups are found, create a new group
-      const groupColor = firstConnection.color;
-      newPair.forEach((connection) => (connection.color = groupColor));
-      const newGroup = {
-          nodes: [top1, top2, bottom1, bottom2],
-          pairs: [...newPair],
-          color: groupColor,
-      };
-
-      // Add to groupMap
-      groupMapRef.current.set(topCombination, newGroup);
-      groupMapRef.current.set(bottomCombination, newGroup);
-
-      // Update connection groups state
-      setConnectionGroups((prevGroups) => [...prevGroups, newGroup]);
-
-        //console.log("New Group Added:", newGroup);
-        //console.log("Connection Pairs:", connectionPairs);
-    }
-
-};
 
 
 
