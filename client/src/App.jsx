@@ -45,9 +45,9 @@ function App() {
 
 
   useEffect(() => {
-    // console.log("Connections updated:", connections);
+    //console.log("Connections updated:", connections);
     drawConnections();
-  }, [connections, topRowCount, bottomRowCount, connectionPairs, connectionGroups, groupMapRef]);
+  }, [connectionGroups, connections, topRowCount, bottomRowCount, connectionPairs]);
 
   useEffect(() => {
     checkAndAddNewNodes();
@@ -78,7 +78,7 @@ function App() {
     if (latestPair && latestPair.length === 2) {
       checkAndGroupConnections(latestPair);
     }
-  }, [connectionPairs, connections]);
+  }, [connectionPairs]);
 
   const checkAndAddNewNodes = () => {
     const allTopNodesConnected = Array.from({ length: topRowCount }, (_, i) =>
@@ -379,7 +379,7 @@ function App() {
     setProgress(0);
     setConnectionGroups([]);
     setCurrentColor(0);
-    groupMap.clear();
+    groupMapRef.current.clear();
     console.log(connectionPairs);
   };
   
@@ -417,14 +417,14 @@ function App() {
     const bottomCombination = [bottom1, bottom2].sort().join(",");
 
     // Find all matching targetGroups
-    let matchingGroups = [];
-    console.log("Matching Groups:", matchingGroups);
-    groupMapRef.current.forEach((group, key) => {
-        if (key === topCombination || key === bottomCombination) {
-            matchingGroups.push(group);
-        }
-    });
+    const matchingGroups = [];
+    const groupTop = groupMapRef.current.get(topCombination);
+    const groupBottom = groupMapRef.current.get(bottomCombination);
 
+    if (groupBottom) matchingGroups.push(groupBottom);
+    if (groupTop && groupTop !== groupBottom) matchingGroups.push(groupTop);
+
+    console.log("Matching Groups:", matchingGroups);
     let mergedGroup = null;
     if (matchingGroups.length > 0) {
       // If multiple matching groups are found, merge them
@@ -432,9 +432,7 @@ function App() {
 
       // Merge newPair into mergedGroup
       newPair.forEach((connection) => {
-          if (connection.color !== mergedGroup.color) {
-              connection.color = mergedGroup.color;
-          }
+          connection.color = mergedGroup.color;
           if (!mergedGroup.pairs.includes(connection)) {
               mergedGroup.pairs.push(connection);
           }
@@ -447,6 +445,9 @@ function App() {
       // Merge all other matching groups into mergedGroup
       for (let i = 1; i < matchingGroups.length; i++) {
           const groupToMerge = matchingGroups[i];
+          groupToMerge.pairs.forEach((connection) => {
+            connection.color = mergedGroup.color; // Set color to mergedGroup's color
+          });
           mergedGroup.nodes = Array.from(
               new Set([...mergedGroup.nodes, ...groupToMerge.nodes])
           );
@@ -473,6 +474,8 @@ function App() {
       // If no matching groups are found, create a new group
       const groupColor = firstConnection.color;
       newPair.forEach((connection) => (connection.color = groupColor));
+      
+      // data structure for group
       const newGroup = {
           nodes: [top1, top2, bottom1, bottom2],
           pairs: [...newPair],
@@ -489,7 +492,7 @@ function App() {
         //console.log("New Group Added:", newGroup);
         //console.log("Connection Pairs:", connectionPairs);
     }
-
+    setConnections([...connections]);
 };
 
 
