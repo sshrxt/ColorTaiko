@@ -325,135 +325,64 @@ function App() {
       }}
       className="AppContainer"
     >
-      <h1 className="title">
-        <a
-          href="https://mineyev.web.illinois.edu/ColorTaiko!/"
-          target="_blank"
-          style={{ textDecoration: "none" }}
-        >
-          <span
-            style={{
-              color: "#e6194b",
-              backgroundColor: "#000000",
-              fontSize: "inherit",
-              display: "inline-block",
-            }}
-          >
-            C
-          </span>
-          <span
-            style={{
-              color: "#3cb44b",
-              backgroundColor: "#000000",
-              fontSize: "inherit",
-              display: "inline-block",
-            }}
-          >
-            o
-          </span>
-          <span
-            style={{
-              color: "#ffe119",
-              backgroundColor: "#000000",
-              fontSize: "inherit",
-              display: "inline-block",
-            }}
-          >
-            l
-          </span>
-          <span
-            style={{
-              color: "#f58231",
-              backgroundColor: "#000000",
-              fontSize: "inherit",
-              display: "inline-block",
-            }}
-          >
-            o
-          </span>
-          <span
-            style={{
-              color: "#dcbeff",
-              backgroundColor: "#000000",
-              fontSize: "inherit",
-              display: "inline-block",
-            }}
-          >
-            r
-          </span>
-          <span
-            style={{
-              color: "#9a6324",
-              backgroundColor: "#000000",
-              fontSize: "inherit",
-              display: "inline-block",
-            }}
-          >
-            T
-          </span>
-          <span
-            style={{
-              color: "#fabebe",
-              backgroundColor: "#000000",
-              fontSize: "inherit",
-              display: "inline-block",
-            }}
-          >
-            a
-          </span>
-          <span
-            style={{
-              color: "#7f00ff",
-              backgroundColor: "#000000",
-              fontSize: "inherit",
-              display: "inline-block",
-            }}
-          >
-            i
-          </span>
-          <span
-            style={{
-              color: "#f032e6",
-              backgroundColor: "#000000",
-              fontSize: "inherit",
-              display: "inline-block",
-            }}
-          >
-            k
-          </span>
-          <span
-            style={{
-              color: "#42d4f4",
-              backgroundColor: "#000000",
-              fontSize: "inherit",
-              display: "inline-block",
-            }}
-          >
-            o
-          </span>
-          <span
-            style={{
-              color: "#bfef45",
-              backgroundColor: "#000000",
-              fontSize: "inherit",
-              display: "inline-block",
-            }}
-          >
-            !
-          </span>
-        </a>
-      </h1>
+    <h1 className="title">
+      <a href="https://mineyev.web.illinois.edu/ColorTaiko!/" target="_blank" style={{ textDecoration: "none" }}>
+        <span style={{ color: '#e6194b', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>C</span>
+        <span style={{ color: '#3cb44b', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
+        <span style={{ color: '#ffe119', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>l</span>
+        <span style={{ color: '#f58231', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
+        <span style={{ color: '#dcbeff', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>r</span>
+        <span style={{ color: '#9a6324', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>T</span>
+        <span style={{ color: '#fabebe', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>a</span>
+        <span style={{ color: '#7f00ff', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>i</span>
+        <span style={{ color: '#f032e6', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>k</span>
+        <span style={{ color: '#42d4f4', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
+        <span style={{ color: '#bfef45', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>!</span>
+      </a>
+    </h1>
+      
+      {/* Container for progress bar and text */}
+<div style={{ marginTop: '-55px' }}> {/* Adjust this value as needed */}
+  {/* Text above progress bar */}
+  <p style={{
+    color: 'white',
+    fontSize: '14px',
+    textAlign: 'left',
+    marginBottom: '-5px',
+    fontFamily: 'inherit',
+  }}>
+    Can you get to 100%?
+  </p>
 
-      <div
-        className="progress-bar-container"
-        onMouseEnter={showTooltip}
-        onMouseMove={showTooltip}
-        onMouseLeave={hideTooltip}
-      >
-        <div className="progress-bar-fill" style={{ width: `${progress}%` }}>
-          <span className="progress-bar-text">{Math.round(progress)}%</span>
-        </div>
-      </div>
+  <div
+    className="progress-bar-container"
+    onMouseEnter={showTooltip}
+    onMouseMove={showTooltip}
+    onMouseLeave={hideTooltip}
+  >
+    <div className="progress-bar-fill" style={{ width: `${progress}%` }}>
+      <span className="progress-bar-text">{Math.round(progress)}%</span>
+    </div>
+  </div>
+
+  {/* Formula for progress bar */}
+  <p style={{
+    color: 'white',
+    fontSize: '14px',
+    textAlign: 'left',
+    marginTop: '-7px',
+    marginBottom: '-20px',
+    fontFamily: 'inherit',
+  }}>
+    Progress = <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+      <span style={{ display: 'block', textAlign: 'center' }}>verticalEdges</span>
+      <span style={{ display: 'block', borderTop: '1px solid white', paddingTop: '2px', textAlign: 'center' }}>
+        (topRowCount - 1) × (bottomRowCount - 1) - (1 if odd, else 0)
+      </span>
+    </span>
+    <span style={{ marginLeft: '5px' }}>× 100%</span>
+  </p>
+</div>
 
       {tooltipVisible && (
         <div
