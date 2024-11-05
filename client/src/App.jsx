@@ -312,7 +312,7 @@ function App() {
     </h1>
       
       {/* Container for progress bar and text */}
-<div style={{ marginTop: '-50px' }}> {/* Adjust this value as needed */}
+<div style={{ marginTop: '-55px' }}> {/* Adjust this value as needed */}
   {/* Text above progress bar */}
   <p style={{
     color: 'white',
