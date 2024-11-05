@@ -321,6 +321,23 @@ function App() {
           <span className="progress-bar-text">{Math.round(progress)}%</span>
         </div>
       </div>
+      
+      {/* formula for progress bar */}
+      <p style={{
+        color: 'white',
+        fontSize: '14px',
+        textAlign: 'left',
+        marginBottom: '-7px',
+        fontFamily: 'inherit', // Use the same font as the rest of the app
+      }}>
+        Progress = <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+          <span style={{ display: 'block', textAlign: 'center' }}>verticalEdges</span>
+          <span style={{ display: 'block', borderTop: '1px solid white', paddingTop: '2px', textAlign: 'center' }}>
+          (topRowCount - 1) × (bottomRowCount - 1) - (1 if odd, else 0)
+          </span>
+        </span>
+        <span style={{ marginLeft: '5px' }}>× 100%</span> 
+      </p>
 
       {tooltipVisible && (
         <div
