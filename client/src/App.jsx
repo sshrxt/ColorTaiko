@@ -310,34 +310,49 @@ function App() {
         <span style={{ color: '#bfef45', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>!</span>
       </a>
     </h1>
-
-      <div
-        className="progress-bar-container"
-        onMouseEnter={showTooltip}
-        onMouseMove={showTooltip}
-        onMouseLeave={hideTooltip}
-      >
-        <div className="progress-bar-fill" style={{ width: `${progress}%` }}>
-          <span className="progress-bar-text">{Math.round(progress)}%</span>
-        </div>
-      </div>
       
-      {/* formula for progress bar */}
-      <p style={{
-        color: 'white',
-        fontSize: '14px',
-        textAlign: 'left',
-        marginBottom: '-7px',
-        fontFamily: 'inherit', // Use the same font as the rest of the app
-      }}>
-        Progress = <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-          <span style={{ display: 'block', textAlign: 'center' }}>verticalEdges</span>
-          <span style={{ display: 'block', borderTop: '1px solid white', paddingTop: '2px', textAlign: 'center' }}>
-          (topRowCount - 1) × (bottomRowCount - 1) - (1 if odd, else 0)
-          </span>
-        </span>
-        <span style={{ marginLeft: '5px' }}>× 100%</span> 
-      </p>
+      {/* Container for progress bar and text */}
+<div style={{ marginTop: '-50px' }}> {/* Adjust this value as needed */}
+  {/* Text above progress bar */}
+  <p style={{
+    color: 'white',
+    fontSize: '14px',
+    textAlign: 'left',
+    marginBottom: '-5px',
+    fontFamily: 'inherit',
+  }}>
+    Can you get to 100%?
+  </p>
+
+  <div
+    className="progress-bar-container"
+    onMouseEnter={showTooltip}
+    onMouseMove={showTooltip}
+    onMouseLeave={hideTooltip}
+  >
+    <div className="progress-bar-fill" style={{ width: `${progress}%` }}>
+      <span className="progress-bar-text">{Math.round(progress)}%</span>
+    </div>
+  </div>
+
+  {/* Formula for progress bar */}
+  <p style={{
+    color: 'white',
+    fontSize: '14px',
+    textAlign: 'left',
+    marginTop: '-7px',
+    marginBottom: '-20px',
+    fontFamily: 'inherit',
+  }}>
+    Progress = <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+      <span style={{ display: 'block', textAlign: 'center' }}>verticalEdges</span>
+      <span style={{ display: 'block', borderTop: '1px solid white', paddingTop: '2px', textAlign: 'center' }}>
+        (topRowCount - 1) × (bottomRowCount - 1) - (1 if odd, else 0)
+      </span>
+    </span>
+    <span style={{ marginLeft: '5px' }}>× 100%</span>
+  </p>
+</div>
 
       {tooltipVisible && (
         <div
