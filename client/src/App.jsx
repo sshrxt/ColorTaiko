@@ -4,11 +4,9 @@ import TaikoNode from "./TaikoNode";
 import ErrorModal from "./ErrorModal";
 import LargeArcEdge from "./LargeArcEdge";
 
-import { generateColor } from './utils/colorUtils';
-import { drawConnections } from "./utils/drawingUtils"; 
-import { checkAndGroupConnections } from "./utils/MergeUtils"; 
-
-
+import { generateColor } from "./utils/colorUtils";
+import { drawConnections } from "./utils/drawingUtils";
+import { checkAndGroupConnections } from "./utils/MergeUtils";
 
 import clickSound from "./assets/sound effect/Click.wav";
 import errorSound from "./assets/sound effect/Error.wav";
@@ -39,7 +37,6 @@ function App() {
 
   const [currentColor, setCurrentColor] = useState(0);
 
-
   // store the pair of edges
   const [connectionPairs, setConnectionPairs] = useState([]);
 
@@ -47,9 +44,21 @@ function App() {
   const groupMapRef = useRef(new Map());
 
 
+  // turn off and on sound use state
+  const [soundText, setSoundText] = useState("Turn Sound Off");
+  const [soundBool, setSoundBool] = useState(true)
+
+
+
   useEffect(() => {
     drawConnections(svgRef, connections, connectionPairs);
-  }, [connectionGroups, connections, topRowCount, bottomRowCount, connectionPairs]);
+  }, [
+    connectionGroups,
+    connections,
+    topRowCount,
+    bottomRowCount,
+    connectionPairs,
+  ]);
 
   useEffect(() => {
     checkAndAddNewNodes();
@@ -67,14 +76,13 @@ function App() {
     const handleResize = () => {
       drawConnections(svgRef, connections, connectionPairs); // Pass parameters
     };
-  
-    window.addEventListener('resize', handleResize);
-  
+
+    window.addEventListener("resize", handleResize);
+
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, [svgRef, connections, connectionPairs]); // Add svgRef to dependencies
-  
 
   useEffect(() => {
     const latestPair = connectionPairs[connectionPairs.length - 1];
@@ -88,7 +96,6 @@ function App() {
       );
     }
   }, [connectionPairs]);
-  
 
   const checkAndAddNewNodes = () => {
     const allTopNodesConnected = Array.from({ length: topRowCount }, (_, i) =>
@@ -139,7 +146,9 @@ function App() {
 
   const handleNodeClick = (nodeId) => {
     setErrorMessage("");
-    connectAudio.play();
+    if(soundBool) {
+      connectAudio.play();
+    }
     if (selectedNodes.includes(nodeId)) {
       setSelectedNodes(selectedNodes.filter((id) => id !== nodeId));
     } else {
@@ -153,7 +162,6 @@ function App() {
     }
   };
 
-  
 
   const tryConnect = (nodes) => {
     if (nodes.length !== 2) return;
@@ -165,7 +173,9 @@ function App() {
       (isTopNode(node1) && isTopNode(node2)) ||
       (isBottomNode(node1) && isBottomNode(node2))
     ) {
-      errorAudio.play();
+      if(soundBool) {
+        errorAudio.play();
+      }
       setErrorMessage("Can't connect two nodes from the same row.");
       setSelectedNodes([]);
       return;
@@ -176,18 +186,23 @@ function App() {
         (conn.nodes.includes(node1) && conn.nodes.includes(node2)) ||
         (conn.nodes.includes(node2) && conn.nodes.includes(node1))
     );
-  
+
     if (isDuplicate) {
-      errorAudio.play();
+      if(soundBool) {
+        errorAudio.play();
+      }
       setErrorMessage("These nodes are already connected.");
       setSelectedNodes([]);
       return;
     }
 
     if (
-      edgeState && (edgeState.nodes.includes(node1) || edgeState.nodes.includes(node2))
+      edgeState &&
+      (edgeState.nodes.includes(node1) || edgeState.nodes.includes(node2))
     ) {
-      errorAudio.play();
+      if(soundBool) {
+        errorAudio.play();
+      }
       setErrorMessage(
         "Two vertical edges in each pair should not share a common vertex"
       );
@@ -209,13 +224,15 @@ function App() {
         let updatedPairs;
         if (lastPair && lastPair.length === 1) {
           // If the last pair has one connection, complete it
-          updatedPairs = [...prevPairs.slice(0, -1), [...lastPair, newConnection]];
+          updatedPairs = [
+            ...prevPairs.slice(0, -1),
+            [...lastPair, newConnection],
+          ];
         } else {
           // Otherwise, create a new pair
           updatedPairs = [...prevPairs, [edgeState, newConnection]];
         }
         return updatedPairs;
-  
       });
       console.log(connectionPairs);
       setEdgeState(null);
@@ -245,7 +262,7 @@ function App() {
   };
 
   const handleClear = () => {
-    setConnectionPairs([])
+    setConnectionPairs([]);
     setConnections([]);
     setSelectedNodes([]);
     setBottomRowCount(1);
@@ -258,14 +275,31 @@ function App() {
     groupMapRef.current.clear();
     console.log(connectionPairs);
   };
+
+  const handleSoundClick = () => {
+    // Toggle the soundBool
+    const newSoundBool = !soundBool;
+    setSoundBool(newSoundBool);
   
+    // Set the soundText based on the new value of soundBool
+    if (newSoundBool) {
+      setSoundText("Turn Sound Off");
+    } else {
+      setSoundText("Turn Sound On");
+    }
+  };
+  
+
   const calculateProgress = () => {
-    let totalPossibleConnections = (topRowCount - 1) *  (bottomRowCount - 1);
+    let totalPossibleConnections = (topRowCount - 1) * (bottomRowCount - 1);
     if (totalPossibleConnections % 2 !== 0) {
       totalPossibleConnections -= 1;
     }
     const verticalEdges = connections.length;
-    const progressPercentage = totalPossibleConnections > 4 ? (verticalEdges / totalPossibleConnections) * 100 : 0;
+    const progressPercentage =
+      totalPossibleConnections > 4
+        ? (verticalEdges / totalPossibleConnections) * 100
+        : 0;
     setProgress(progressPercentage);
   };
 
@@ -278,15 +312,11 @@ function App() {
     setTooltipVisible(false);
   };
 
-
   useEffect(() => {
     console.log("Updated Connection Groups:", connectionGroups);
   }, [connectionGroups]);
 
-
-
   return (
-    
     <div
       style={{
         textAlign: "center",
@@ -295,21 +325,124 @@ function App() {
       }}
       className="AppContainer"
     >
-    <h1 className="title">
-      <a href="https://mineyev.web.illinois.edu/ColorTaiko!/" target="_blank" style={{ textDecoration: "none" }}>
-        <span style={{ color: '#e6194b', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>C</span>
-        <span style={{ color: '#3cb44b', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
-        <span style={{ color: '#ffe119', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>l</span>
-        <span style={{ color: '#f58231', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
-        <span style={{ color: '#dcbeff', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>r</span>
-        <span style={{ color: '#9a6324', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>T</span>
-        <span style={{ color: '#fabebe', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>a</span>
-        <span style={{ color: '#7f00ff', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>i</span>
-        <span style={{ color: '#f032e6', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>k</span>
-        <span style={{ color: '#42d4f4', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>o</span>
-        <span style={{ color: '#bfef45', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>!</span>
-      </a>
-    </h1>
+      <h1 className="title">
+        <a
+          href="https://mineyev.web.illinois.edu/ColorTaiko!/"
+          target="_blank"
+          style={{ textDecoration: "none" }}
+        >
+          <span
+            style={{
+              color: "#e6194b",
+              backgroundColor: "#000000",
+              fontSize: "inherit",
+              display: "inline-block",
+            }}
+          >
+            C
+          </span>
+          <span
+            style={{
+              color: "#3cb44b",
+              backgroundColor: "#000000",
+              fontSize: "inherit",
+              display: "inline-block",
+            }}
+          >
+            o
+          </span>
+          <span
+            style={{
+              color: "#ffe119",
+              backgroundColor: "#000000",
+              fontSize: "inherit",
+              display: "inline-block",
+            }}
+          >
+            l
+          </span>
+          <span
+            style={{
+              color: "#f58231",
+              backgroundColor: "#000000",
+              fontSize: "inherit",
+              display: "inline-block",
+            }}
+          >
+            o
+          </span>
+          <span
+            style={{
+              color: "#dcbeff",
+              backgroundColor: "#000000",
+              fontSize: "inherit",
+              display: "inline-block",
+            }}
+          >
+            r
+          </span>
+          <span
+            style={{
+              color: "#9a6324",
+              backgroundColor: "#000000",
+              fontSize: "inherit",
+              display: "inline-block",
+            }}
+          >
+            T
+          </span>
+          <span
+            style={{
+              color: "#fabebe",
+              backgroundColor: "#000000",
+              fontSize: "inherit",
+              display: "inline-block",
+            }}
+          >
+            a
+          </span>
+          <span
+            style={{
+              color: "#7f00ff",
+              backgroundColor: "#000000",
+              fontSize: "inherit",
+              display: "inline-block",
+            }}
+          >
+            i
+          </span>
+          <span
+            style={{
+              color: "#f032e6",
+              backgroundColor: "#000000",
+              fontSize: "inherit",
+              display: "inline-block",
+            }}
+          >
+            k
+          </span>
+          <span
+            style={{
+              color: "#42d4f4",
+              backgroundColor: "#000000",
+              fontSize: "inherit",
+              display: "inline-block",
+            }}
+          >
+            o
+          </span>
+          <span
+            style={{
+              color: "#bfef45",
+              backgroundColor: "#000000",
+              fontSize: "inherit",
+              display: "inline-block",
+            }}
+          >
+            !
+          </span>
+        </a>
+      </h1>
 
       <div
         className="progress-bar-container"
@@ -352,7 +485,30 @@ function App() {
         Clear
       </button>
 
-      <ErrorModal className = "error-container" message={errorMessage} onClose={() => setErrorMessage("")} />
+      <button // Replace with your function to handle turning off sound
+        onClick={handleSoundClick}
+        style={{
+          position: "absolute",
+          top: "10px", // Adjust this value to position it below the Clear button
+          right: "100px",
+          padding: "10px 20px",
+          fontSize: "16px",
+          backgroundColor: "#f44336", // You can use the same or a different color
+          color: "white",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+          fontFamily: "inherit",
+        }}
+      >
+        {soundText}
+      </button>
+
+      <ErrorModal
+        className="error-container"
+        message={errorMessage}
+        onClose={() => setErrorMessage("")}
+      />
 
       {showNodes && (
         <div className="GameBox" style={{ position: "relative" }}>
