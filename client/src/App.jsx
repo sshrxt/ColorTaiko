@@ -3,16 +3,20 @@ import InputBox from "./InputBox";
 import TaikoNode from "./TaikoNode";
 import ErrorModal from "./ErrorModal";
 import LargeArcEdge from "./LargeArcEdge";
+import { InlineMath } from 'react-katex';
+import 'katex/dist/katex.min.css';
 
 import { generateColor } from './utils/colorUtils';
 import { drawConnections } from "./utils/drawingUtils"; 
 import { checkAndGroupConnections } from "./utils/MergeUtils"; 
+import { SettingsMenu } from "./utils/settingMenu";
 
 
 
 import clickSound from "./assets/sound effect/Click.wav";
 import errorSound from "./assets/sound effect/Error.wav";
 import connectSound from "./assets/sound effect/Connection.wav";
+import SettingIconImage from "./assets/setting-icon.png";
 
 const edgeTypes = {
   custom: LargeArcEdge, // Register custom arc edge type
@@ -37,6 +41,12 @@ function App() {
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
+  const [showSettings, setShowSettings] = useState(false);
+  const [offset, setOffset] = useState(() => {
+    const savedOffset = localStorage.getItem("offset");
+    return savedOffset !== null ? parseInt(savedOffset, 10) : 5;
+  });
+
   const [currentColor, setCurrentColor] = useState(0);
 
 
@@ -46,10 +56,17 @@ function App() {
   const [connectionGroups, setConnectionGroups] = useState([]);
   const groupMapRef = useRef(new Map());
 
+  const[welcomeMessage, setWelcomeMessage] = useState(false);
+  useEffect(() => {
+    if(topRowCount === 1 && bottomRowCount === 1) {
+      setWelcomeMessage(true);
+    }
+  }, [topRowCount, bottomRowCount]);
+
 
   useEffect(() => {
-    drawConnections(svgRef, connections, connectionPairs);
-  }, [connectionGroups, connections, topRowCount, bottomRowCount, connectionPairs]);
+    drawConnections(svgRef, connections, connectionPairs, offset);
+  }, [connectionGroups, connections, topRowCount, bottomRowCount, connectionPairs, offset]);
 
   useEffect(() => {
     checkAndAddNewNodes();
@@ -65,7 +82,7 @@ function App() {
 
   useEffect(() => {
     const handleResize = () => {
-      drawConnections(svgRef, connections, connectionPairs); // Pass parameters
+      drawConnections(svgRef, connections, connectionPairs, offset); // Pass parameters
     };
   
     window.addEventListener('resize', handleResize);
@@ -88,6 +105,15 @@ function App() {
       );
     }
   }, [connectionPairs]);
+
+  useEffect(() => {
+    if (progress === 50) {
+      //clickAudio.play();
+    } else if (progress === 100) {
+      //clickAudio.play();
+    }
+  }, [progress]);
+  
   
 
   const checkAndAddNewNodes = () => {
@@ -119,6 +145,8 @@ function App() {
           isSelected={selectedNodes.includes(`top-${i}`)}
           index={i}
           totalCount={topRowCount}
+          isFaded={count > 1 && i === count - 1}
+          position="top"
         />
       </>
     ));
@@ -133,6 +161,9 @@ function App() {
         isSelected={selectedNodes.includes(`bottom-${i}`)}
         index={i}
         totalCount={bottomRowCount}
+        isFaded={count > 1 && i === count - 1}
+        position="bottom"
+
       />
     ));
   };
@@ -153,6 +184,14 @@ function App() {
     }
   };
 
+  const handleToolMenuClick = () => {
+    setShowSettings((prev) => !prev);
+  };
+
+  const handleOffsetChange = (newOffset) => {
+    setOffset(newOffset);
+    localStorage.setItem("offset", newOffset); //store to localStorage
+  };
   
 
   const tryConnect = (nodes) => {
@@ -166,7 +205,7 @@ function App() {
       (isBottomNode(node1) && isBottomNode(node2))
     ) {
       errorAudio.play();
-      setErrorMessage("Can't connect two nodes from the same row.");
+      setErrorMessage("Can't connect two vertices from the same row.");
       setSelectedNodes([]);
       return;
     }
@@ -179,7 +218,7 @@ function App() {
   
     if (isDuplicate) {
       errorAudio.play();
-      setErrorMessage("These nodes are already connected.");
+      setErrorMessage("These vertices are already connected.");
       setSelectedNodes([]);
       return;
     }
@@ -265,7 +304,8 @@ function App() {
       totalPossibleConnections -= 1;
     }
     const verticalEdges = connections.length;
-    const progressPercentage = totalPossibleConnections > 4 ? (verticalEdges / totalPossibleConnections) * 100 : 0;
+    let progressPercentage = totalPossibleConnections > 2 ? (verticalEdges / totalPossibleConnections) * 100 : 0;
+    progressPercentage = Math.min(progressPercentage, 100);
     setProgress(progressPercentage);
   };
 
@@ -310,6 +350,13 @@ function App() {
         <span style={{ color: '#bfef45', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>!</span>
       </a>
     </h1>
+    <div className="welcome-message"> 
+    {welcomeMessage && (
+        <div className="fade-message">
+          Connect the nodes!
+        </div>
+    )}
+    </div>
 
       <div
         className="progress-bar-container"
@@ -319,6 +366,9 @@ function App() {
       >
         <div className="progress-bar-fill" style={{ width: `${progress}%` }}>
           <span className="progress-bar-text">{Math.round(progress)}%</span>
+        </div>
+        <div style={{ marginTop: '10px', textAlign: 'center', color: 'white' }}>
+        <InlineMath math="E = mc^2" />
         </div>
       </div>
 
@@ -331,6 +381,18 @@ function App() {
           <p>Top Nodes: {topRowCount - 1}</p>
           <p>Bottom Nodes: {bottomRowCount - 1}</p>
         </div>
+      )}
+      
+      <div>
+      <img
+        src={SettingIconImage}
+        alt="Settings Icon"
+        className="icon"
+        onClick={handleToolMenuClick}
+      />
+      </div>
+      {showSettings && (
+        <SettingsMenu offset={offset} onOffsetChange={handleOffsetChange} />
       )}
 
       <button
@@ -366,6 +428,7 @@ function App() {
               width: "100%",
               height: "100%",
               pointerEvents: "none",
+              zIndex: 10,
             }}
           />
           <div className="GameRow" style={{ marginTop: "100px" }}>

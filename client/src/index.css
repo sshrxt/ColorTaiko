@@ -29,6 +29,8 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  overflow: visible;
+
 
 }
 
@@ -36,6 +38,7 @@ body {
   display: flex;
   justify-content: space-around;
   align-items: center;
+  overflow: visible;
 }
 
 
@@ -79,7 +82,7 @@ body {
   cursor: pointer;
   border: 2px solid black;
   transition: all 0.5s ease;
-  z-index: 1;
+  z-index: 0;
 }
 
 .taiko-node-enter {
@@ -138,4 +141,82 @@ body {
   white-space: nowrap;
   box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.2);
   z-index: 1000;
+}
+
+.icon {
+  position: absolute;
+  top: 16px;
+  right: 150px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.icon:hover {
+  color: #007bff;
+  transform: scale(1.1); 
+}
+
+.settings-menu {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  width: 200px;
+  padding: 15px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.settings-menu h3 {
+  color: black;
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.settings-menu label {
+  color: black;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-menu input[type="range"] {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.settings-menu input[type="number"] {
+  margin-top: 5px;
+}
+
+.fade-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 36px;
+  font-family: 'Cinzel Decorative', serif;
+  font-weight: 400;
+  color: #dcdcdc;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  animation: fadeInOut 3s ease-in-out forwards;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }

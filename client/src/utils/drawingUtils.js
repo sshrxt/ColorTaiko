@@ -1,5 +1,5 @@
 
-export const drawConnections = (svgRef, connections, connectionPairs) => {
+export const drawConnections = (svgRef, connections, connectionPairs, offset) => {
     if (!svgRef.current) return;
   
     while (svgRef.current.firstChild) {
@@ -7,7 +7,18 @@ export const drawConnections = (svgRef, connections, connectionPairs) => {
     }
   
     const svgRect = svgRef.current.getBoundingClientRect();
-  
+    
+    const adjustPoint = (x1, y1, x2, y2, distance) => {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      const scale = (len - distance) / len;
+      return {
+          x: x1 + dx * scale,
+          y: y1 + dy * scale
+      };
+    };
+
     connections.forEach(({ nodes: [start, end], color }) => {
       const startElement = document.getElementById(start);
       const endElement = document.getElementById(end);
@@ -16,16 +27,20 @@ export const drawConnections = (svgRef, connections, connectionPairs) => {
         const startRect = startElement.getBoundingClientRect();
         const endRect = endElement.getBoundingClientRect();
   
-        const startX = startRect.left + startRect.width / 2 - svgRect.left;
-        const startY = startRect.top + startRect.height / 2 - svgRect.top;
-        const endX = endRect.left + endRect.width / 2 - svgRect.left;
-        const endY = endRect.top + endRect.height / 2 - svgRect.top;
+        let startX = startRect.left + startRect.width / 2 - svgRect.left;
+        let startY = startRect.top + startRect.height / 2 - svgRect.top;
+        let endX = endRect.left + endRect.width / 2 - svgRect.left;
+        let endY = endRect.top + endRect.height / 2 - svgRect.top;
+
+        // Adjust points to be offset from node centers
+        const adjustedStart = adjustPoint(startX, startY, endX, endY, offset);
+        const adjustedEnd = adjustPoint(endX, endY, startX, startY, offset);
   
         const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        line.setAttribute("x1", startX);
-        line.setAttribute("y1", startY);
-        line.setAttribute("x2", endX);
-        line.setAttribute("y2", endY);
+        line.setAttribute("x1", adjustedStart.x);
+        line.setAttribute("y1", adjustedStart.y);
+        line.setAttribute("x2", adjustedEnd.x);
+        line.setAttribute("y2", adjustedEnd.y);
         line.setAttribute("stroke", color);
         line.setAttribute("stroke-width", "4");
         line.setAttribute("stroke-linecap", "round");
@@ -57,22 +72,26 @@ export const drawConnections = (svgRef, connections, connectionPairs) => {
           const startRect = startElement.getBoundingClientRect();
           const endRect = endElement.getBoundingClientRect();
   
-          const startX = startRect.left + startRect.width / 2 - svgRect.left;
-          const startY = startRect.top + startRect.height / 2 - svgRect.top;
-          const endX = endRect.left + endRect.width / 2 - svgRect.left;
-          const endY = endRect.top + endRect.height / 2 - svgRect.top;
+          let startX = startRect.left + startRect.width / 2 - svgRect.left;
+          let startY = startRect.top + startRect.height / 2 - svgRect.top;
+          let endX = endRect.left + endRect.width / 2 - svgRect.left;
+          let endY = endRect.top + endRect.height / 2 - svgRect.top;
+
+          // Adjust points to be offset from node centers
+          const adjustedStart = adjustPoint(startX, startY, endX, endY, offset);
+          const adjustedEnd = adjustPoint(endX, endY, startX, startY, offset);
   
-          const dx = endX - startX;
-          const dy = endY - startY;
+          const dx = adjustedEnd.x - adjustedStart.x;
+          const dy = adjustedEnd.y - adjustedStart.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
   
-          const controlX = (startX + endX) / 2;
+          const controlX = (adjustedStart.x + adjustedEnd.x) / 2;
           const controlY = isTopCurve
-            ? Math.min(startY, endY) - distance / 5
-            : Math.max(startY, endY) + distance / 5;
+            ? Math.min(adjustedStart.y, adjustedEnd.y) - distance / 5
+            : Math.max(adjustedStart.y, adjustedEnd.y) + distance / 5;
   
           const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          const d = `M ${startX},${startY} Q ${controlX},${controlY} ${endX},${endY}`;
+          const d = `M ${adjustedStart.x},${adjustedStart.y} Q ${controlX},${controlY} ${adjustedEnd.x},${adjustedEnd.y}`;
           path.setAttribute("d", d);
           path.setAttribute("stroke", color);
           path.setAttribute("fill", "none");
@@ -97,5 +116,6 @@ export const drawConnections = (svgRef, connections, connectionPairs) => {
         if (bottomCurve) svgRef.current.appendChild(bottomCurve);
       }
     });
+    
   };
   
