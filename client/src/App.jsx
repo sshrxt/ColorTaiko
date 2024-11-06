@@ -76,13 +76,6 @@ function App() {
     }
   }, [topRowCount, bottomRowCount]);
 
-
-  // turn off and on sound use state
-  const [soundText, setSoundText] = useState("Turn Sound Off");
-  const [soundBool, setSoundBool] = useState(true)
-
-
-
   useEffect(() => {
 
     drawConnections(svgRef, connections, connectionPairs, offset);
@@ -480,26 +473,7 @@ function App() {
       >
         Clear
       </button>
-
-      <button // Replace with your function to handle turning off sound
-        onClick={handleSoundClick}
-        style={{
-          position: "absolute",
-          top: "10px", // Adjust this value to position it below the Clear button
-          right: "100px",
-          padding: "10px 20px",
-          fontSize: "16px",
-          backgroundColor: "#f44336", // You can use the same or a different color
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-          fontFamily: "inherit",
-        }}
-      >
-        {soundText}
-      </button>
-
+      
       <ErrorModal
         className="error-container"
         message={errorMessage}
