@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 
-const TaikoNode = ({ id, onClick, isSelected, index, totalCount }) => {
+const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, position, blackDotEffect }) => {
   const [entering, setEntering] = useState(true);
 
   useEffect(() => {
@@ -10,7 +10,7 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount }) => {
   }, []);
 
   const nodeSize = Math.max(30, 100 / totalCount);
-  const label = 'a${index+1}';
+  const label = position === "top" ? `b${index + 1}` : `a${index + 1}`;
 
   return (
     <div
@@ -18,30 +18,47 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount }) => {
       onClick={onClick}
       className={`taiko-node ${entering ? 'taiko-node-enter' : ''}`}
       style={{
-        backgroundColor: isSelected ? 'yellow' : 'white',
+        backgroundColor: isSelected ? 'yellow' : isFaded ? '#939799' : 'white',
+        opacity: isSelected ? 1 : isFaded ? 0.5 : 1,
         width: `${nodeSize}px`,
         height: `${nodeSize}px`,
         margin: '5px',
-        borderRadius: '50%', // Make the white node circular
-        position: 'relative', // Allows positioning inner dot
+        position: 'relative',
         display: 'flex',
+        //flexDirection: 'column',
         alignItems: 'center',
+        zIndex: 0,
+        borderRadius: '50%',
+        border: '2px solid white',
         justifyContent: 'center',
-        border: '2px solid white', // Optional: ensures white border in case of loading artifacts
       }}
     >
-      <div
-        style={{
-          width: `40%`, // Size of inner black dot
-          height: `40%`,
-          backgroundColor: 'black',
-          borderRadius: '50%', // Make inner dot circular
-        }}
-      ></div>
-
-      {/* <span style={ {position : "absolute", fontSize: '12px'}}>
-        {label}
-      </span> */}
+      {position === "top" && (
+        <span style={{ position: "absolute", top: "-30px", fontSize: '20px', color: 'white', fontFamily: "'STIX Two Math', serif"   }}>
+          {label}
+        </span>
+      )}
+      <div style={{ width: '100%', height: '100%' }} />
+      {position === "bottom" && (
+        <span style={{ position: "absolute", bottom: "-30px", fontSize: '20px', color: 'white', fontFamily: "'STIX Two Math', serif"   }}>
+          {label}
+        </span>
+      )}
+      {/* <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+        {blackDotEffect && (
+          <div
+          style={{
+            width: `40%`,
+            height: `40%`,
+            backgroundColor: 'black',
+            borderRadius: '50%',
+            position: 'absolute',
+            top: '30%',
+            left: '30%',
+          }}
+          ></div>
+        )}
+      </div> */}
     </div>
   );
 };

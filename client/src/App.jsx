@@ -11,6 +11,8 @@ import { checkAndGroupConnections } from "./utils/MergeUtils";
 import clickSound from "./assets/sound effect/Click.wav";
 import errorSound from "./assets/sound effect/Error.wav";
 import connectSound from "./assets/sound effect/Connection.wav";
+import SettingIconImage from "./assets/setting-icon.png";
+import { SettingsMenu } from "./utils/settingMenu";
 
 const edgeTypes = {
   custom: LargeArcEdge, // Register custom arc edge type
@@ -35,6 +37,30 @@ function App() {
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
+  const [showSettings, setShowSettings] = useState(false);
+  const [offset, setOffset] = useState(() => {
+    const savedOffset = localStorage.getItem("offset");
+    return savedOffset !== null ? parseInt(savedOffset, 10) : 5;
+  });
+  const [soundBool, setSoundBool] = useState(() => {
+    const savedSound = localStorage.getItem("sound");
+    return savedSound !== null ? JSON.parse(savedSound) : true;
+  });
+
+  const [blackDotEffect, setBlackDotEffect] = useState(() => {
+    const savedDotEffectState = localStorage.getItem("blackDotEffect");
+    return savedDotEffectState ? JSON.parse(savedDotEffectState) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sound", soundBool);
+  }, [soundBool]);
+
+  useEffect(() => {
+    localStorage.setItem("blackDotEffect", JSON.stringify(blackDotEffect));
+  }, [blackDotEffect]);
+
+
   const [currentColor, setCurrentColor] = useState(0);
 
   // store the pair of edges
@@ -42,6 +68,13 @@ function App() {
 
   const [connectionGroups, setConnectionGroups] = useState([]);
   const groupMapRef = useRef(new Map());
+
+  const[welcomeMessage, setWelcomeMessage] = useState(false);
+  useEffect(() => {
+    if(topRowCount === 1 && bottomRowCount === 1) {
+      setWelcomeMessage(true);
+    }
+  }, [topRowCount, bottomRowCount]);
 
 
   // turn off and on sound use state
@@ -51,14 +84,9 @@ function App() {
 
 
   useEffect(() => {
-    drawConnections(svgRef, connections, connectionPairs);
-  }, [
-    connectionGroups,
-    connections,
-    topRowCount,
-    bottomRowCount,
-    connectionPairs,
-  ]);
+
+    drawConnections(svgRef, connections, connectionPairs, offset);
+  }, [connectionGroups, connections, topRowCount, bottomRowCount, connectionPairs, offset]);
 
   useEffect(() => {
     checkAndAddNewNodes();
@@ -74,7 +102,7 @@ function App() {
 
   useEffect(() => {
     const handleResize = () => {
-      drawConnections(svgRef, connections, connectionPairs); // Pass parameters
+      drawConnections(svgRef, connections, connectionPairs, offset); // Pass parameters
     };
 
     window.addEventListener("resize", handleResize);
@@ -126,6 +154,9 @@ function App() {
           isSelected={selectedNodes.includes(`top-${i}`)}
           index={i}
           totalCount={topRowCount}
+          isFaded={count > 1 && i === count - 1}
+          position="top"
+          blackDotEffect={blackDotEffect}
         />
       </>
     ));
@@ -140,6 +171,9 @@ function App() {
         isSelected={selectedNodes.includes(`bottom-${i}`)}
         index={i}
         totalCount={bottomRowCount}
+        isFaded={count > 1 && i === count - 1}
+        position="bottom"
+
       />
     ));
   };
@@ -161,6 +195,18 @@ function App() {
       }
     }
   };
+
+
+
+  const handleToolMenuClick = () => {
+    setShowSettings((prev) => !prev);
+  };
+
+  const handleOffsetChange = (newOffset) => {
+    setOffset(newOffset);
+    localStorage.setItem("offset", newOffset); //store to localStorage
+  };
+  
 
 
   const tryConnect = (nodes) => {
@@ -278,17 +324,16 @@ function App() {
 
   const handleSoundClick = () => {
     // Toggle the soundBool
-    const newSoundBool = !soundBool;
-    setSoundBool(newSoundBool);
-  
-    // Set the soundText based on the new value of soundBool
-    if (newSoundBool) {
-      setSoundText("Turn Sound Off");
-    } else {
-      setSoundText("Turn Sound On");
-    }
+
+    setSoundBool((prev) => !prev);
+
   };
-  
+
+  const toggleBlackDotEffect = () => {
+    setBlackDotEffect((prev) => !prev);
+  };
+
+ 
 
   const calculateProgress = () => {
     let totalPossibleConnections = (topRowCount - 1) * (bottomRowCount - 1);
@@ -296,10 +341,9 @@ function App() {
       totalPossibleConnections -= 1;
     }
     const verticalEdges = connections.length;
-    const progressPercentage =
-      totalPossibleConnections > 4
-        ? (verticalEdges / totalPossibleConnections) * 100
-        : 0;
+
+    let progressPercentage = totalPossibleConnections > 2 ? (verticalEdges / totalPossibleConnections) * 100 : 0;
+    progressPercentage = Math.min(progressPercentage, 100);
     setProgress(progressPercentage);
   };
 
@@ -340,6 +384,7 @@ function App() {
         <span style={{ color: '#bfef45', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>!</span>
       </a>
     </h1>
+
       
       {/* Container for progress bar and text */}
 <div style={{ marginTop: '-55px' }}> {/* Adjust this value as needed */}
@@ -383,6 +428,13 @@ function App() {
     <span style={{ marginLeft: '5px' }}>× 100%</span>
   </p>
 </div>
+    <div className="welcome-message"> 
+    {welcomeMessage && (
+        <div className="fade-message">
+          Connect the nodes!
+        </div>
+    )}
+    </div>
 
       {tooltipVisible && (
         <div
@@ -393,6 +445,21 @@ function App() {
           <p>Top Nodes: {topRowCount - 1}</p>
           <p>Bottom Nodes: {bottomRowCount - 1}</p>
         </div>
+      )}
+      
+      <div>
+      <img
+        src={SettingIconImage}
+        alt="Settings Icon"
+        className="icon"
+        onClick={handleToolMenuClick}
+      />
+      </div>
+      {showSettings && (
+        <SettingsMenu offset={offset} onOffsetChange={handleOffsetChange}
+         soundbool={soundBool} onSoundControl={handleSoundClick}
+         blackDotEffect={blackDotEffect}
+         onToggleBlackDotEffect={toggleBlackDotEffect}/>
       )}
 
       <button
@@ -451,6 +518,7 @@ function App() {
               width: "100%",
               height: "100%",
               pointerEvents: "none",
+              zIndex: 10,
             }}
           />
           <div className="GameRow" style={{ marginTop: "100px" }}>
