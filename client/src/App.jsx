@@ -4,11 +4,9 @@ import TaikoNode from "./TaikoNode";
 import ErrorModal from "./ErrorModal";
 import LargeArcEdge from "./LargeArcEdge";
 
-import { generateColor } from './utils/colorUtils';
-import { drawConnections } from "./utils/drawingUtils"; 
-import { checkAndGroupConnections } from "./utils/MergeUtils"; 
-
-
+import { generateColor } from "./utils/colorUtils";
+import { drawConnections } from "./utils/drawingUtils";
+import { checkAndGroupConnections } from "./utils/MergeUtils";
 
 import clickSound from "./assets/sound effect/Click.wav";
 import errorSound from "./assets/sound effect/Error.wav";
@@ -65,7 +63,6 @@ function App() {
 
   const [currentColor, setCurrentColor] = useState(0);
 
-
   // store the pair of edges
   const [connectionPairs, setConnectionPairs] = useState([]);
 
@@ -80,7 +77,14 @@ function App() {
   }, [topRowCount, bottomRowCount]);
 
 
+  // turn off and on sound use state
+  const [soundText, setSoundText] = useState("Turn Sound Off");
+  const [soundBool, setSoundBool] = useState(true)
+
+
+
   useEffect(() => {
+
     drawConnections(svgRef, connections, connectionPairs, offset);
   }, [connectionGroups, connections, topRowCount, bottomRowCount, connectionPairs, offset]);
 
@@ -100,14 +104,13 @@ function App() {
     const handleResize = () => {
       drawConnections(svgRef, connections, connectionPairs, offset); // Pass parameters
     };
-  
-    window.addEventListener('resize', handleResize);
-  
+
+    window.addEventListener("resize", handleResize);
+
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, [svgRef, connections, connectionPairs]); // Add svgRef to dependencies
-  
 
   useEffect(() => {
     const latestPair = connectionPairs[connectionPairs.length - 1];
@@ -121,7 +124,6 @@ function App() {
       );
     }
   }, [connectionPairs]);
-  
 
   const checkAndAddNewNodes = () => {
     const allTopNodesConnected = Array.from({ length: topRowCount }, (_, i) =>
@@ -194,6 +196,8 @@ function App() {
     }
   };
 
+
+
   const handleToolMenuClick = () => {
     setShowSettings((prev) => !prev);
   };
@@ -203,6 +207,7 @@ function App() {
     localStorage.setItem("offset", newOffset); //store to localStorage
   };
   
+
 
   const tryConnect = (nodes) => {
     if (nodes.length !== 2) return;
@@ -227,7 +232,7 @@ function App() {
         (conn.nodes.includes(node1) && conn.nodes.includes(node2)) ||
         (conn.nodes.includes(node2) && conn.nodes.includes(node1))
     );
-  
+
     if (isDuplicate) {
       if(soundBool) {
         errorAudio.play();
@@ -238,9 +243,12 @@ function App() {
     }
 
     if (
-      edgeState && (edgeState.nodes.includes(node1) || edgeState.nodes.includes(node2))
+      edgeState &&
+      (edgeState.nodes.includes(node1) || edgeState.nodes.includes(node2))
     ) {
-      errorAudio.play();
+      if(soundBool) {
+        errorAudio.play();
+      }
       setErrorMessage(
         "Two vertical edges in each pair should not share a common vertex"
       );
@@ -262,13 +270,15 @@ function App() {
         let updatedPairs;
         if (lastPair && lastPair.length === 1) {
           // If the last pair has one connection, complete it
-          updatedPairs = [...prevPairs.slice(0, -1), [...lastPair, newConnection]];
+          updatedPairs = [
+            ...prevPairs.slice(0, -1),
+            [...lastPair, newConnection],
+          ];
         } else {
           // Otherwise, create a new pair
           updatedPairs = [...prevPairs, [edgeState, newConnection]];
         }
         return updatedPairs;
-  
       });
       console.log(connectionPairs);
       setEdgeState(null);
@@ -298,7 +308,7 @@ function App() {
   };
 
   const handleClear = () => {
-    setConnectionPairs([])
+    setConnectionPairs([]);
     setConnections([]);
     setSelectedNodes([]);
     setBottomRowCount(1);
@@ -314,6 +324,7 @@ function App() {
 
   const handleSoundClick = () => {
     // Toggle the soundBool
+
     setSoundBool((prev) => !prev);
 
   };
@@ -322,13 +333,15 @@ function App() {
     setBlackDotEffect((prev) => !prev);
   };
 
-  
+ 
+
   const calculateProgress = () => {
-    let totalPossibleConnections = (topRowCount - 1) *  (bottomRowCount - 1);
+    let totalPossibleConnections = (topRowCount - 1) * (bottomRowCount - 1);
     if (totalPossibleConnections % 2 !== 0) {
       totalPossibleConnections -= 1;
     }
     const verticalEdges = connections.length;
+
     let progressPercentage = totalPossibleConnections > 2 ? (verticalEdges / totalPossibleConnections) * 100 : 0;
     progressPercentage = Math.min(progressPercentage, 100);
     setProgress(progressPercentage);
@@ -343,15 +356,11 @@ function App() {
     setTooltipVisible(false);
   };
 
-
   useEffect(() => {
     console.log("Updated Connection Groups:", connectionGroups);
   }, [connectionGroups]);
 
-
-
   return (
-    
     <div
       style={{
         textAlign: "center",
@@ -375,6 +384,50 @@ function App() {
         <span style={{ color: '#bfef45', backgroundColor: '#000000', fontSize: 'inherit', display: 'inline-block' }}>!</span>
       </a>
     </h1>
+
+      
+      {/* Container for progress bar and text */}
+<div style={{ marginTop: '-55px' }}> {/* Adjust this value as needed */}
+  {/* Text above progress bar */}
+  <p style={{
+    color: 'white',
+    fontSize: '14px',
+    textAlign: 'left',
+    marginBottom: '-5px',
+    fontFamily: 'inherit',
+  }}>
+    Can you get to 100%?
+  </p>
+
+  <div
+    className="progress-bar-container"
+    onMouseEnter={showTooltip}
+    onMouseMove={showTooltip}
+    onMouseLeave={hideTooltip}
+  >
+    <div className="progress-bar-fill" style={{ width: `${progress}%` }}>
+      <span className="progress-bar-text">{Math.round(progress)}%</span>
+    </div>
+  </div>
+
+  {/* Formula for progress bar */}
+  <p style={{
+    color: 'white',
+    fontSize: '14px',
+    textAlign: 'left',
+    marginTop: '-7px',
+    marginBottom: '-20px',
+    fontFamily: 'inherit',
+  }}>
+    Progress = <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+      <span style={{ display: 'block', textAlign: 'center' }}>verticalEdges</span>
+      <span style={{ display: 'block', borderTop: '1px solid white', paddingTop: '2px', textAlign: 'center' }}>
+        (topRowCount - 1) × (bottomRowCount - 1) - (1 if odd, else 0)
+      </span>
+    </span>
+    <span style={{ marginLeft: '5px' }}>× 100%</span>
+  </p>
+</div>
     <div className="welcome-message"> 
     {welcomeMessage && (
         <div className="fade-message">
@@ -382,17 +435,6 @@ function App() {
         </div>
     )}
     </div>
-
-      <div
-        className="progress-bar-container"
-        onMouseEnter={showTooltip}
-        onMouseMove={showTooltip}
-        onMouseLeave={hideTooltip}
-      >
-        <div className="progress-bar-fill" style={{ width: `${progress}%` }}>
-          <span className="progress-bar-text">{Math.round(progress)}%</span>
-        </div>
-      </div>
 
       {tooltipVisible && (
         <div
@@ -439,7 +481,30 @@ function App() {
         Clear
       </button>
 
-      <ErrorModal className = "error-container" message={errorMessage} onClose={() => setErrorMessage("")} />
+      <button // Replace with your function to handle turning off sound
+        onClick={handleSoundClick}
+        style={{
+          position: "absolute",
+          top: "10px", // Adjust this value to position it below the Clear button
+          right: "100px",
+          padding: "10px 20px",
+          fontSize: "16px",
+          backgroundColor: "#f44336", // You can use the same or a different color
+          color: "white",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+          fontFamily: "inherit",
+        }}
+      >
+        {soundText}
+      </button>
+
+      <ErrorModal
+        className="error-container"
+        message={errorMessage}
+        onClose={() => setErrorMessage("")}
+      />
 
       {showNodes && (
         <div className="GameBox" style={{ position: "relative" }}>

@@ -130,6 +130,7 @@ body {
   color: white;
   white-space: nowrap;
 }
+
 .tooltip {
   position: absolute;
   background-color: rgba(0, 0, 0, 0.8);
