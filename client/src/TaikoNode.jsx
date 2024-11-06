@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 
-const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, position }) => {
+const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, position, blackDotEffect }) => {
   const [entering, setEntering] = useState(true);
 
   useEffect(() => {
@@ -25,9 +25,12 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, positi
         margin: '5px',
         position: 'relative',
         display: 'flex',
-        flexDirection: 'column',
+        //flexDirection: 'column',
         alignItems: 'center',
         zIndex: 0,
+        borderRadius: '50%',
+        border: '2px solid white',
+        justifyContent: 'center',
       }}
     >
       {position === "top" && (
@@ -41,6 +44,21 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, positi
           {label}
         </span>
       )}
+      {/* <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+        {blackDotEffect && (
+          <div
+          style={{
+            width: `40%`,
+            height: `40%`,
+            backgroundColor: 'black',
+            borderRadius: '50%',
+            position: 'absolute',
+            top: '30%',
+            left: '30%',
+          }}
+          ></div>
+        )}
+      </div> */}
     </div>
   );
 };

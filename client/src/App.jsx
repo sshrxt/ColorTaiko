@@ -3,13 +3,10 @@ import InputBox from "./InputBox";
 import TaikoNode from "./TaikoNode";
 import ErrorModal from "./ErrorModal";
 import LargeArcEdge from "./LargeArcEdge";
-import { InlineMath } from 'react-katex';
-import 'katex/dist/katex.min.css';
 
 import { generateColor } from './utils/colorUtils';
 import { drawConnections } from "./utils/drawingUtils"; 
 import { checkAndGroupConnections } from "./utils/MergeUtils"; 
-import { SettingsMenu } from "./utils/settingMenu";
 
 
 
@@ -17,6 +14,7 @@ import clickSound from "./assets/sound effect/Click.wav";
 import errorSound from "./assets/sound effect/Error.wav";
 import connectSound from "./assets/sound effect/Connection.wav";
 import SettingIconImage from "./assets/setting-icon.png";
+import { SettingsMenu } from "./utils/settingMenu";
 
 const edgeTypes = {
   custom: LargeArcEdge, // Register custom arc edge type
@@ -46,6 +44,24 @@ function App() {
     const savedOffset = localStorage.getItem("offset");
     return savedOffset !== null ? parseInt(savedOffset, 10) : 5;
   });
+  const [soundBool, setSoundBool] = useState(() => {
+    const savedSound = localStorage.getItem("sound");
+    return savedSound !== null ? JSON.parse(savedSound) : true;
+  });
+
+  const [blackDotEffect, setBlackDotEffect] = useState(() => {
+    const savedDotEffectState = localStorage.getItem("blackDotEffect");
+    return savedDotEffectState ? JSON.parse(savedDotEffectState) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sound", soundBool);
+  }, [soundBool]);
+
+  useEffect(() => {
+    localStorage.setItem("blackDotEffect", JSON.stringify(blackDotEffect));
+  }, [blackDotEffect]);
+
 
   const [currentColor, setCurrentColor] = useState(0);
 
@@ -105,15 +121,6 @@ function App() {
       );
     }
   }, [connectionPairs]);
-
-  useEffect(() => {
-    if (progress === 50) {
-      //clickAudio.play();
-    } else if (progress === 100) {
-      //clickAudio.play();
-    }
-  }, [progress]);
-  
   
 
   const checkAndAddNewNodes = () => {
@@ -147,6 +154,7 @@ function App() {
           totalCount={topRowCount}
           isFaded={count > 1 && i === count - 1}
           position="top"
+          blackDotEffect={blackDotEffect}
         />
       </>
     ));
@@ -170,7 +178,9 @@ function App() {
 
   const handleNodeClick = (nodeId) => {
     setErrorMessage("");
-    connectAudio.play();
+    if(soundBool) {
+      connectAudio.play();
+    }
     if (selectedNodes.includes(nodeId)) {
       setSelectedNodes(selectedNodes.filter((id) => id !== nodeId));
     } else {
@@ -204,8 +214,10 @@ function App() {
       (isTopNode(node1) && isTopNode(node2)) ||
       (isBottomNode(node1) && isBottomNode(node2))
     ) {
-      errorAudio.play();
-      setErrorMessage("Can't connect two vertices from the same row.");
+      if(soundBool) {
+        errorAudio.play();
+      }
+      setErrorMessage("Can't connect two nodes from the same row.");
       setSelectedNodes([]);
       return;
     }
@@ -217,8 +229,10 @@ function App() {
     );
   
     if (isDuplicate) {
-      errorAudio.play();
-      setErrorMessage("These vertices are already connected.");
+      if(soundBool) {
+        errorAudio.play();
+      }
+      setErrorMessage("These nodes are already connected.");
       setSelectedNodes([]);
       return;
     }
@@ -297,6 +311,17 @@ function App() {
     groupMapRef.current.clear();
     console.log(connectionPairs);
   };
+
+  const handleSoundClick = () => {
+    // Toggle the soundBool
+    setSoundBool((prev) => !prev);
+
+  };
+
+  const toggleBlackDotEffect = () => {
+    setBlackDotEffect((prev) => !prev);
+  };
+
   
   const calculateProgress = () => {
     let totalPossibleConnections = (topRowCount - 1) *  (bottomRowCount - 1);
@@ -367,9 +392,6 @@ function App() {
         <div className="progress-bar-fill" style={{ width: `${progress}%` }}>
           <span className="progress-bar-text">{Math.round(progress)}%</span>
         </div>
-        <div style={{ marginTop: '10px', textAlign: 'center', color: 'white' }}>
-        <InlineMath math="E = mc^2" />
-        </div>
       </div>
 
       {tooltipVisible && (
@@ -392,7 +414,10 @@ function App() {
       />
       </div>
       {showSettings && (
-        <SettingsMenu offset={offset} onOffsetChange={handleOffsetChange} />
+        <SettingsMenu offset={offset} onOffsetChange={handleOffsetChange}
+         soundbool={soundBool} onSoundControl={handleSoundClick}
+         blackDotEffect={blackDotEffect}
+         onToggleBlackDotEffect={toggleBlackDotEffect}/>
       )}
 
       <button

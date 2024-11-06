@@ -1,6 +1,10 @@
 import React from "react";
 
-export const SettingsMenu = ({ offset, onOffsetChange }) => {
+export const SettingsMenu = ({
+   offset, onOffsetChange,
+   soundbool, onSoundControl,
+   blackDotEffect, onToggleBlackDotEffect
+   }) => {
   const handleOffsetInput = (e) => {
     const newOffset = parseInt(e.target.value, 10);
     onOffsetChange(newOffset);
@@ -29,6 +33,30 @@ export const SettingsMenu = ({ offset, onOffsetChange }) => {
           style={{ marginLeft: "10px", width: "50px" }}
         />
       </label>
+      <div style={{ marginTop: "10px" }}>
+        <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          Sound Control:
+          <span>{soundbool ? "ON" : "OFF"}</span>
+          <input
+            type="checkbox"
+            checked={soundbool}
+            onChange={onSoundControl}
+            style={{ transform: "scale(1.5)" }}
+          />
+        </label>
+      </div>
+      <div style={{ marginTop: "10px" }}>
+        <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          Black Dot Effect:
+          <span>{blackDotEffect ? "ON" : "OFF"}</span>
+          <input
+            type="checkbox"
+            checked={blackDotEffect}
+            onChange={onToggleBlackDotEffect}
+            style={{ transform: "scale(1.5)" }}
+          />
+        </label>
+        </div>
     </div>
   );
 };
