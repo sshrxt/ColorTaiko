@@ -1,0 +1,30 @@
+.progress-bar-container {
+    width: 20%;
+    background-color: #837b7b;
+    border-radius: 5px;
+    margin: 20px 0;
+    overflow: hidden;
+    height: 20px;
+    position: relative;
+  }
+  
+  .progress-bar-fill {
+    background-color: #4caf50;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    transition: width 0.3s ease-in-out;
+    padding-left: 5px; /* Small padding to keep text readable at low progress */
+    color: white;
+    font-weight: bold;
+    border-radius: inherit;
+  }
+  
+.progress-bar-text {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    color: white;
+    white-space: nowrap;
+  }

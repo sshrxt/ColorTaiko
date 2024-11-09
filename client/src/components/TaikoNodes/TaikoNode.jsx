@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
+import './taikoNode.css';
 
 const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, position, blackDotEffect }) => {
   const [entering, setEntering] = useState(true);
