@@ -1,6 +1,7 @@
 import React from "react";
+import "./settingMenu.css";
 
-export const SettingsMenu = ({
+const SettingsMenu = ({
    offset, onOffsetChange,
    soundbool, onSoundControl,
    blackDotEffect, onToggleBlackDotEffect
@@ -60,3 +61,4 @@ export const SettingsMenu = ({
     </div>
   );
 };
+export default SettingsMenu;
