@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import PropTypes from "prop-types";
+import { useState } from 'react';
 import './progressBar.css';
 
 
@@ -54,6 +55,12 @@ const ProgressBar = ({ progress, connections, topRowCount, bottomRowCount }) => 
       )}
     </div>
   );
+};
+ProgressBar.propTypes = {
+  progress: PropTypes.number.isRequired,
+  connections: PropTypes.array.isRequired,
+  topRowCount: PropTypes.number.isRequired,
+  bottomRowCount: PropTypes.number.isRequired,
 };
 
 export default ProgressBar;

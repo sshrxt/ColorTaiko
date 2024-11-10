@@ -1,6 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import TaikoNode from "./components/TaikoNodes/TaikoNode";
-import ErrorModal from "./components/ErrorModal";
 
 import { generateColor } from "./utils/colorUtils";
 import { drawConnections } from "./utils/drawingUtils";
@@ -10,6 +8,8 @@ import { checkAndAddNewNodes} from "./utils/checkAndAddNewNodes";
 
 import SettingIconImage from "./assets/setting-icon.png";
 
+import TaikoNode from "./components/TaikoNodes/TaikoNode";
+import ErrorModal from "./components/ErrorModal";
 import SettingsMenu from "./components/ToolMenu/settingMenu";
 import ProgressBar from "./components/ProgressBar/progressBar";
 import Title from "./components/title";
@@ -20,9 +20,10 @@ import { useSettings } from './hooks/useSetting';
 
 
 function App() {
+  // Game state management
   const [topRowCount, setTopRowCount] = useState(1);
   const [bottomRowCount, setBottomRowCount] = useState(1);
-  const [showNodes, setShowNodes] = useState(true);
+  const [showNodes] = useState(true);
   const [selectedNodes, setSelectedNodes] = useState([]);
   const [connections, setConnections] = useState([]);
   const [connectionPairs, setConnectionPairs] = useState([]);
@@ -34,37 +35,58 @@ function App() {
   const svgRef = useRef(null);
   const groupMapRef = useRef(new Map());
 
-  const { clickAudio, errorAudio, connectAudio } = useAudio();
+  // Custom hooks for managing audio and settings
+  const { errorAudio, connectAudio } = useAudio();
   const { offset, setOffset, soundBool, setSoundBool, blackDotEffect, setBlackDotEffect } = useSettings();
+
+  // References for SVG elements and connection groups
   const [showSettings, setShowSettings] = useState(false);
   const [welcomeMessage, setWelcomeMessage] = useState(false);
 
+  /**
+   * Sets welcome message visibility based on the number of nodes in each row.
+   */
   useEffect(() => {
     if (topRowCount === 1 && bottomRowCount === 1) {
       setWelcomeMessage(true);
     }
   }, [topRowCount, bottomRowCount]);
 
+  /**
+   * Draws connections on the SVG element when related state changes.
+   */
   useEffect(() => {
     drawConnections(svgRef, connections, connectionPairs, offset);
   }, [connectionGroups, connections, topRowCount, bottomRowCount, connectionPairs, offset]);
 
+  /**
+   * Checks if new nodes should be added based on current connections.
+   */
   useEffect(() => {
     checkAndAddNewNodes(topRowCount, bottomRowCount, connections, setTopRowCount, setBottomRowCount);
   }, [connections, topRowCount, bottomRowCount]);
 
+  /**
+   * Calculates progress as a percentage based on completed connections.
+   */
   useEffect(() => {
     setProgress(calculateProgress(connections, topRowCount, bottomRowCount));
   }, [connections, topRowCount, bottomRowCount]);
 
+  /**
+   * Handles window resize events to redraw connections, ensuring layout consistency.
+   */
   useEffect(() => {
     const handleResize = () => {
       drawConnections(svgRef, connections, connectionPairs, offset);
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [svgRef, connections, connectionPairs]);
+  }, [svgRef, connections, connectionPairs, offset]);
 
+  /**
+   * Groups connections when a new connection pair is completed.
+   */
   useEffect(() => {
     const latestPair = connectionPairs[connectionPairs.length - 1];
     if (latestPair && latestPair.length === 2) {
@@ -104,6 +126,7 @@ function App() {
         totalCount={bottomRowCount}
         isFaded={count > 1 && i === count - 1}
         position="bottom"
+        blackDotEffect={blackDotEffect}
       />
     ));
 
