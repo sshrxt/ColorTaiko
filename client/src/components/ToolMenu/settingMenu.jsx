@@ -1,11 +1,14 @@
-import React from "react";
+import PropTypes from "prop-types";
 import "./settingMenu.css";
 
 const SettingsMenu = ({
-   offset, onOffsetChange,
-   soundbool, onSoundControl,
-   blackDotEffect, onToggleBlackDotEffect
-   }) => {
+  offset,
+  onOffsetChange,
+  soundbool,
+  onSoundControl,
+  blackDotEffect,
+  onToggleBlackDotEffect
+}) => {
   const handleOffsetInput = (e) => {
     const newOffset = parseInt(e.target.value, 10);
     onOffsetChange(newOffset);
@@ -60,5 +63,13 @@ const SettingsMenu = ({
         </div>
     </div>
   );
+};
+SettingsMenu.propTypes = {
+  offset: PropTypes.number.isRequired,
+  onOffsetChange: PropTypes.func.isRequired,
+  soundbool: PropTypes.bool.isRequired,
+  onSoundControl: PropTypes.func.isRequired,
+  blackDotEffect: PropTypes.bool.isRequired,
+  onToggleBlackDotEffect: PropTypes.func.isRequired,
 };
 export default SettingsMenu;

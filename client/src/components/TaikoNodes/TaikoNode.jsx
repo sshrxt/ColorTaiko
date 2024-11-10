@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import PropTypes from "prop-types";
+import { useState, useEffect } from 'react';
 import './taikoNode.css';
 
 const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, position, blackDotEffect }) => {
@@ -22,15 +23,6 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, positi
         opacity: isSelected ? 1 : isFaded ? 0.5 : 1,
         width: `${nodeSize}px`,
         height: `${nodeSize}px`,
-        margin: '5px',
-        position: 'relative',
-        display: 'flex',
-        //flexDirection: 'column',
-        alignItems: 'center',
-        zIndex: 0,
-        borderRadius: '50%',
-        border: '2px solid white',
-        justifyContent: 'center',
       }}
     >
       {position === "top" && (
@@ -44,23 +36,19 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, positi
           {label}
         </span>
       )}
-      {/* <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-        {blackDotEffect && (
-          <div
-          style={{
-            width: `40%`,
-            height: `40%`,
-            backgroundColor: 'black',
-            borderRadius: '50%',
-            position: 'absolute',
-            top: '30%',
-            left: '30%',
-          }}
-          ></div>
-        )}
-      </div> */}
+      {blackDotEffect && <div className="black-dot"></div>}
+
     </div>
   );
 };
-
+TaikoNode.propTypes = {
+  id: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
+  isSelected: PropTypes.bool.isRequired,
+  index: PropTypes.number.isRequired,
+  totalCount: PropTypes.number.isRequired,
+  isFaded: PropTypes.bool.isRequired,
+  position: PropTypes.oneOf(["top", "bottom"]).isRequired,
+  blackDotEffect: PropTypes.bool.isRequired,
+};
 export default TaikoNode;

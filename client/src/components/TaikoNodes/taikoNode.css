@@ -1,13 +1,15 @@
 
 .taiko-node {
-  width: calc(100% / var(--node-count) - 20px);
-  height: calc(100% / var(--node-count) - 20px);
   max-width: 30px;  
   max-height: 30px;
   border-radius: 50%;
   background-color: white;
   margin: 5px;
   cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 2px solid black;
   transition: all 0.5s ease;
   z-index: 0;
@@ -22,4 +24,13 @@
 .taiko-node-enter-active {
   opacity: 1;
   transform: scale(1);
+}
+
+.black-dot {
+  width: 10px;
+  height: 10px;
+  background-color: black;
+  border-radius: 50%;
+  position: absolute;
+  z-index: 11;
 }
