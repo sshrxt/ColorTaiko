@@ -85,6 +85,14 @@ function App() {
   }, [svgRef, connections, connectionPairs, offset]);
 
   /**
+   * for debugging purposes
+   */
+  useEffect(() => {
+    console.log("Connections",connections);
+    console.log("Connection Pairs",connectionPairs);
+  } , [connections]);
+
+  /**
    * Groups connections when a new connection pair is completed.
    */
   useEffect(() => {
@@ -249,15 +257,15 @@ function App() {
         }
         return updatedPairs;
       });
-      console.log(connectionPairs);
+      //.log(connectionPairs);
       setEdgeState(null);
     } else {
       // If no pending edge, create a new edge and add to edgeState
       newColor = generateColor(currentColor, setCurrentColor);
-      console.log("newColor: ", newColor);
+      //console.log("newColor: ", newColor);
       //console.log(newColor);
       const newConnection = {
-        nodes: nodes,
+        nodes: [node1, node2],
         color: newColor,
       };
       setConnections([...connections, newConnection]);
