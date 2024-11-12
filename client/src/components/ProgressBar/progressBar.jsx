@@ -43,7 +43,7 @@ const ProgressBar = ({ progress, connections, topRowCount, bottomRowCount, light
           <p>Vertical Edges: {connections.length}</p>
           <p>Top Nodes: {topRowCount - 1}</p>
           <p>Bottom Nodes: {bottomRowCount - 1}</p>
-          <p style={{ color: lightMode ? 'black' : 'white', fontSize: '12px', textAlign: 'left', marginTop: '0px', marginBottom: '-20px' }}>
+          <p style={{ color: 'white', fontSize: '12px', textAlign: 'left', marginTop: '0px', marginBottom: '-20px' }}>
             Success: 
             <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>
               <span style={{ display: 'block', textAlign: 'center' }}>{connections.length}</span>
