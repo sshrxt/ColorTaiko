@@ -15,6 +15,7 @@ const ProgressBar = ({ progress, connections, topRowCount, bottomRowCount, light
   const hideTooltip = () => {
     setTooltipVisible(false);
   };
+  
 
   return (
     <div style={{ marginTop: '-55px' }}>
