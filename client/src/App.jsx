@@ -176,9 +176,13 @@ function App() {
 
   const tryConnect = (nodes) => {
     if (nodes.length !== 2) return;
-    const [node1, node2] = nodes;
+    let [node1, node2] = nodes;
     const isTopNode = (id) => id.startsWith("top");
     const isBottomNode = (id) => id.startsWith("bottom");
+
+    if (isBottomNode(node1) && isTopNode(node2)) {
+      [node1, node2] = [node2, node1];
+    }
 
     if (
       (isTopNode(node1) && isTopNode(node2)) ||
@@ -226,7 +230,7 @@ function App() {
       // If there is a pending edge, use the same color and create a pair
       newColor = edgeState.color;
       const newConnection = {
-        nodes: nodes,
+        nodes: [node1, node2],
         color: newColor,
       };
       setConnections([...connections, newConnection]);
