@@ -18,7 +18,7 @@ const ProgressBar = ({ progress, connections, topRowCount, bottomRowCount, light
 
   return (
     <div style={{ marginTop: '-55px' }}>
-      <p style={{ color: lightMode ? 'black' : 'white', fontSize: '14px', textAlign: 'left', marginBottom: '-5px' }}>
+      <p style={{ color: lightMode ? 'black' : '#837b7b', fontSize: '14px', textAlign: 'left', marginBottom: '-5px' }}>
         Can you get to 100%?
       </p>
 
@@ -33,15 +33,6 @@ const ProgressBar = ({ progress, connections, topRowCount, bottomRowCount, light
         </div>
       </div>
 
-      <p style={{ color: lightMode ? 'black' : 'white', fontSize: '14px', textAlign: 'left', marginTop: '-7px', marginBottom: '-20px' }}>
-        Progress = <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-          <span style={{ display: 'block', textAlign: 'center' }}>verticalEdges</span>
-          <span style={{ display: 'block', borderTop: lightMode ? '1px solid black' : '1px solid white', paddingTop: '2px', textAlign: 'center' }}>
-            (topRowCount - 1) × (bottomRowCount - 1) - (1 if odd, else 0)
-          </span>
-        </span>
-        <span style={{ marginLeft: '5px' }}>× 100%</span>
-      </p>
 
       {tooltipVisible && (
         <div
@@ -51,6 +42,18 @@ const ProgressBar = ({ progress, connections, topRowCount, bottomRowCount, light
           <p>Vertical Edges: {connections.length}</p>
           <p>Top Nodes: {topRowCount - 1}</p>
           <p>Bottom Nodes: {bottomRowCount - 1}</p>
+          <p style={{ color: lightMode ? 'black' : 'white', fontSize: '12px', textAlign: 'left', marginTop: '0px', marginBottom: '-20px' }}>
+            Success: 
+            <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+              <span style={{ display: 'block', textAlign: 'center' }}>{connections.length}</span>
+              <span style={{ display: 'block', borderTop: lightMode ? '1px solid black' : '1px solid white', paddingTop: '2px', textAlign: 'center' }}>
+                ({topRowCount - 1} × {bottomRowCount - 1})
+              </span>
+            </span>
+            <span style={{ marginLeft: '5px' }}>= {connections.length / ((topRowCount - 1) * (bottomRowCount - 1))}</span>
+          </p>
+          
+
         </div>
       )}
     </div>
