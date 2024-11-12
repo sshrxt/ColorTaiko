@@ -18,6 +18,12 @@ body {
   color: white;
 }
 
+.light-mode{
+  background-color: #F5F5F7;
+  color: rgb(0, 0, 0);
+  
+}
+
 .title {
   font-size: 4rem;
   margin-top: 10px;
@@ -67,6 +73,19 @@ body {
   opacity: 0;
   animation: fadeInOut 3s ease-in-out forwards;
 }
+.light-mode .fade-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 36px;
+  font-family: 'Cinzel Decorative', serif;
+  font-weight: 400;
+  color: #000000;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  animation: fadeInOut 3s ease-in-out forwards;
+}
 
 @keyframes fadeInOut {
   0%, 100% { opacity: 0; }
@@ -83,6 +102,9 @@ body {
 .icon {
   cursor: pointer;
   /* Other styling as needed */
+}
+.light-mode .icon {
+  filter: invert(1) brightness(0.8);
 }
 
 .clear-button {

@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useState, useEffect } from 'react';
 import './taikoNode.css';
 
-const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, position, blackDotEffect }) => {
+const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, position, blackDotEffect, lightMode}) => {
   const [entering, setEntering] = useState(true);
 
   useEffect(() => {
@@ -26,13 +26,13 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, positi
       }}
     >
       {position === "top" && (
-        <span style={{ position: "absolute", top: "-30px", fontSize: '20px', color: 'white', fontFamily: "'STIX Two Math', serif"   }}>
+        <span style={{ position: "absolute", top: "-30px", fontSize: '20px', color: lightMode ? 'black' : 'white', fontFamily: "'STIX Two Math', serif", userSelect: "none"   }}>
           {label}
         </span>
       )}
       <div style={{ width: '100%', height: '100%' }} />
       {position === "bottom" && (
-        <span style={{ position: "absolute", bottom: "-30px", fontSize: '20px', color: 'white', fontFamily: "'STIX Two Math', serif"   }}>
+        <span style={{ position: "absolute", bottom: "-30px", fontSize: '20px', color: lightMode ? 'black' : 'white', fontFamily: "'STIX Two Math', serif", userSelect: "none"  }}>
           {label}
         </span>
       )}
@@ -50,5 +50,6 @@ TaikoNode.propTypes = {
   isFaded: PropTypes.bool.isRequired,
   position: PropTypes.oneOf(["top", "bottom"]).isRequired,
   blackDotEffect: PropTypes.bool.isRequired,
+  lightMode: PropTypes.bool.isRequired,
 };
 export default TaikoNode;
