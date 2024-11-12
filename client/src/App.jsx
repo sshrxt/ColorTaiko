@@ -13,6 +13,7 @@ import ErrorModal from "./components/ErrorModal";
 import SettingsMenu from "./components/ToolMenu/settingMenu";
 import ProgressBar from "./components/ProgressBar/progressBar";
 import Title from "./components/title";
+import StageIndicator from "./components/StageIndicator/stageIndicator";
 
 import { useAudio } from './hooks/useAudio';
 import { useSettings } from './hooks/useSetting';
@@ -35,6 +36,7 @@ function App() {
   const svgRef = useRef(null);
   const groupMapRef = useRef(new Map());
   const previousProgressRef = useRef(progress);
+  const [currentStage, setCurrentStage] = useState(1);
 
   // Custom hooks for managing audio and settings
   const { clickAudio, errorAudio, connectsuccess, perfectAudio} = useAudio();
@@ -220,6 +222,10 @@ function App() {
     setLightMode((prevMode) => !prevMode);
   };
 
+  const handleStageClick = (stage) => {
+    setCurrentStage(stage);
+  };
+
 
   const tryConnect = (nodes) => {
     if (nodes.length !== 2) return;
@@ -324,6 +330,8 @@ function App() {
   return (
     <div className={`app-container ${lightMode ? 'light-mode' : 'dark-mode'}`}>
       <Title />
+
+      <StageIndicator currentStage={currentStage} onStageClick={handleStageClick} />
   
       <ProgressBar
         progress={progress}
@@ -364,7 +372,7 @@ function App() {
       <button onClick={handleClear} className="clear-button">
         Clear
       </button>
-  
+ 
       <ErrorModal
         className="error-container"
         message={errorMessage}
