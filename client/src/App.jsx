@@ -34,14 +34,16 @@ function App() {
   const [errorMessage, setErrorMessage] = useState("");
   const svgRef = useRef(null);
   const groupMapRef = useRef(new Map());
+  const previousProgressRef = useRef(progress);
 
   // Custom hooks for managing audio and settings
-  const { errorAudio, connectAudio } = useAudio();
+  const { clickAudio, errorAudio, connectsuccess, perfectAudio} = useAudio();
   const { offset, setOffset, soundBool, setSoundBool, blackDotEffect, setBlackDotEffect } = useSettings();
 
   // References for SVG elements and connection groups
   const [showSettings, setShowSettings] = useState(false);
   const [welcomeMessage, setWelcomeMessage] = useState(false);
+  const [Percent100Message, setPercent100Message] = useState(false);
 
   /**
    * Sets welcome message visibility based on the number of nodes in each row.
@@ -51,6 +53,7 @@ function App() {
       setWelcomeMessage(true);
     }
   }, [topRowCount, bottomRowCount]);
+  
 
   /**
    * Draws connections on the SVG element when related state changes.
@@ -68,10 +71,35 @@ function App() {
 
   /**
    * Calculates progress as a percentage based on completed connections.
+   * Play connect success sound when progress increases.
    */
   useEffect(() => {
-    setProgress(calculateProgress(connections, topRowCount, bottomRowCount));
-  }, [connections, topRowCount, bottomRowCount]);
+    const timer = setTimeout(() => {
+      const newProgress = calculateProgress(connections, topRowCount, bottomRowCount);
+      setProgress(newProgress);
+  
+      if (newProgress === 100) {
+        setPercent100Message(true);
+        if(soundBool) {
+        perfectAudio.play();
+        }
+      } else if (newProgress > previousProgressRef.current && soundBool) {
+        console.log("connect success sound");
+        connectsuccess.play();
+      }
+  
+      previousProgressRef.current = newProgress;
+    }, 100);
+  
+    return () => clearTimeout(timer);
+
+  }, [connections,topRowCount, bottomRowCount]);
+
+  // useEffect(() => {
+  //   setProgressToShow(calculateProgress(connections, topRowCount, bottomRowCount));
+  // }, [connections, topRowCount, bottomRowCount]);
+
+
 
   /**
    * Handles window resize events to redraw connections, ensuring layout consistency.
@@ -90,6 +118,8 @@ function App() {
   useEffect(() => {
     console.log("Connections",connections);
     console.log("Connection Pairs",connectionPairs);
+    console.log("Connection Groups",connectionGroups);
+    console.log("Group Map",groupMapRef);
   } , [connections]);
 
   /**
@@ -138,17 +168,17 @@ function App() {
       />
     ));
 
-  const handleNodeClick = (nodeId) => {
-    setErrorMessage("");
-    if (soundBool) connectAudio.play();
-    if (selectedNodes.includes(nodeId)) {
-      setSelectedNodes(selectedNodes.filter((id) => id !== nodeId));
-    } else if (selectedNodes.length < 2) {
-      const newSelectedNodes = [...selectedNodes, nodeId];
-      setSelectedNodes(newSelectedNodes);
-      if (newSelectedNodes.length === 2) tryConnect(newSelectedNodes);
-    }
-  };
+    const handleNodeClick = (nodeId) => {
+      setErrorMessage("");
+      if (soundBool) clickAudio.play();
+      if (selectedNodes.includes(nodeId)) {
+        setSelectedNodes(selectedNodes.filter((id) => id !== nodeId));
+      } else if (selectedNodes.length < 2) {
+        const newSelectedNodes = [...selectedNodes, nodeId];
+        setSelectedNodes(newSelectedNodes);
+        if (newSelectedNodes.length === 2) tryConnect(newSelectedNodes);
+      }
+    };
 
   const handleToolMenuClick = () => setShowSettings((prev) => !prev);
 
@@ -289,6 +319,10 @@ function App() {
   
       {welcomeMessage && (
         <div className="welcome-message fade-message">Connect the nodes!</div>
+      )}
+
+      {Percent100Message && (
+        <div className="welcome-message fade-message">You did it! 100%!</div>
       )}
   
       <img
