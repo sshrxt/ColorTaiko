@@ -115,12 +115,12 @@ function App() {
   /**
    * for debugging purposes
    */
-  useEffect(() => {
-    console.log("Connections",connections);
-    console.log("Connection Pairs",connectionPairs);
-    console.log("Connection Groups",connectionGroups);
-    console.log("Group Map",groupMapRef);
-  } , [connections]);
+
+  // useEffect(() => {
+  //   console.log("Connections",connections);
+  //   console.log("Connection Pairs",connectionPairs);
+  // } , [connections]);
+
 
   /**
    * Groups connections when a new connection pair is completed.
