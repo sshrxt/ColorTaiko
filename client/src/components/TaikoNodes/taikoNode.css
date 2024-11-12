@@ -3,7 +3,6 @@
   max-width: 30px;  
   max-height: 30px;
   border-radius: 50%;
-  background-color: white;
   margin: 5px;
   cursor: pointer;
   position: relative;
@@ -14,6 +13,7 @@
   transition: all 0.5s ease;
   z-index: 0;
 }
+
 
 .taiko-node-enter {
   opacity: 0;

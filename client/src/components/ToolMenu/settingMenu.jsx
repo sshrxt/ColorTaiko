@@ -7,7 +7,9 @@ const SettingsMenu = ({
   soundbool,
   onSoundControl,
   blackDotEffect,
-  onToggleBlackDotEffect
+  onToggleBlackDotEffect,
+  lightMode,
+  onToggleLightMode
 }) => {
   const handleOffsetInput = (e) => {
     const newOffset = parseInt(e.target.value, 10);
@@ -61,6 +63,18 @@ const SettingsMenu = ({
           />
         </label>
         </div>
+        <div style={{ marginTop: "10px" }}>
+        <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          Light Mode:
+          <span>{lightMode ? "ON" : "OFF"}</span>
+          <input
+            type="checkbox"
+            checked={lightMode}
+            onChange={onToggleLightMode}
+            style={{ transform: "scale(1.5)" }}
+          />
+        </label>
+      </div>
     </div>
   );
 };
@@ -71,5 +85,7 @@ SettingsMenu.propTypes = {
   onSoundControl: PropTypes.func.isRequired,
   blackDotEffect: PropTypes.bool.isRequired,
   onToggleBlackDotEffect: PropTypes.func.isRequired,
+  lightMode: PropTypes.bool.isRequired,
+  onToggleLightMode: PropTypes.func.isRequired,
 };
 export default SettingsMenu;

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import './progressBar.css';
 
 
-const ProgressBar = ({ progress, connections, topRowCount, bottomRowCount }) => {
+const ProgressBar = ({ progress, connections, topRowCount, bottomRowCount, lightMode}) => {
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
@@ -18,7 +18,7 @@ const ProgressBar = ({ progress, connections, topRowCount, bottomRowCount }) => 
 
   return (
     <div style={{ marginTop: '-55px' }}>
-      <p style={{ color: 'white', fontSize: '14px', textAlign: 'left', marginBottom: '-5px' }}>
+      <p style={{ color: lightMode ? 'black' : 'white', fontSize: '14px', textAlign: 'left', marginBottom: '-5px' }}>
         Can you get to 100%?
       </p>
 
@@ -33,10 +33,10 @@ const ProgressBar = ({ progress, connections, topRowCount, bottomRowCount }) => 
         </div>
       </div>
 
-      <p style={{ color: 'white', fontSize: '14px', textAlign: 'left', marginTop: '-7px', marginBottom: '-20px' }}>
+      <p style={{ color: lightMode ? 'black' : 'white', fontSize: '14px', textAlign: 'left', marginTop: '-7px', marginBottom: '-20px' }}>
         Progress = <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>
           <span style={{ display: 'block', textAlign: 'center' }}>verticalEdges</span>
-          <span style={{ display: 'block', borderTop: '1px solid white', paddingTop: '2px', textAlign: 'center' }}>
+          <span style={{ display: 'block', borderTop: lightMode ? '1px solid black' : '1px solid white', paddingTop: '2px', textAlign: 'center' }}>
             (topRowCount - 1) × (bottomRowCount - 1) - (1 if odd, else 0)
           </span>
         </span>
@@ -61,6 +61,7 @@ ProgressBar.propTypes = {
   connections: PropTypes.array.isRequired,
   topRowCount: PropTypes.number.isRequired,
   bottomRowCount: PropTypes.number.isRequired,
+  lightMode: PropTypes.bool.isRequired
 };
 
 export default ProgressBar;

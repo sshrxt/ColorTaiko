@@ -16,6 +16,11 @@ export function useSettings() {
     return savedDotEffectState ? JSON.parse(savedDotEffectState) : false;
   });
 
+  const [lightMode, setLightMode] = useState(() => {
+    const savedLightMode = localStorage.getItem("lightMode");
+    return savedLightMode ? JSON.parse(savedLightMode) : false;
+  });
+
   useEffect(() => {
     localStorage.setItem("sound", soundBool);
   }, [soundBool]);
@@ -24,5 +29,9 @@ export function useSettings() {
     localStorage.setItem("blackDotEffect", JSON.stringify(blackDotEffect));
   }, [blackDotEffect]);
 
-  return { offset, setOffset, soundBool, setSoundBool, blackDotEffect, setBlackDotEffect };
+  useEffect(() => {
+    localStorage.setItem("lightMode", JSON.stringify(lightMode));
+  }, [lightMode]);
+
+  return { offset, setOffset, soundBool, setSoundBool, blackDotEffect, setBlackDotEffect, lightMode, setLightMode };
 }

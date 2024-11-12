@@ -38,7 +38,9 @@ function App() {
 
   // Custom hooks for managing audio and settings
   const { clickAudio, errorAudio, connectsuccess, perfectAudio} = useAudio();
-  const { offset, setOffset, soundBool, setSoundBool, blackDotEffect, setBlackDotEffect } = useSettings();
+  const { offset, setOffset, soundBool, setSoundBool, blackDotEffect, setBlackDotEffect,
+          lightMode, setLightMode
+        }  = useSettings();
 
   // References for SVG elements and connection groups
   const [showSettings, setShowSettings] = useState(false);
@@ -150,6 +152,7 @@ function App() {
         isFaded={count > 1 && i === count - 1}
         position="top"
         blackDotEffect={blackDotEffect}
+        lightMode={lightMode}
       />
     ));
 
@@ -165,6 +168,7 @@ function App() {
         isFaded={count > 1 && i === count - 1}
         position="bottom"
         blackDotEffect={blackDotEffect}
+        lightMode={lightMode}
       />
     ));
 
@@ -211,6 +215,11 @@ function App() {
   const toggleBlackDotEffect = () => {
     setBlackDotEffect((prev) => !prev);
   };
+
+  const toggleLightMode = () => {
+    setLightMode((prevMode) => !prevMode);
+  };
+
 
   const tryConnect = (nodes) => {
     if (nodes.length !== 2) return;
@@ -306,8 +315,14 @@ function App() {
     setSelectedNodes([]);
   };
 
+  if (lightMode) {
+    document.body.classList.add('light-mode');
+  } else {
+    document.body.classList.remove('light-mode');
+  }
+
   return (
-    <div className="app-container">
+    <div className={`app-container ${lightMode ? 'light-mode' : 'dark-mode'}`}>
       <Title />
   
       <ProgressBar
@@ -315,6 +330,7 @@ function App() {
         connections={connections}
         topRowCount={topRowCount}
         bottomRowCount={bottomRowCount}
+        lightMode={lightMode}
       />
   
       {welcomeMessage && (
@@ -340,6 +356,8 @@ function App() {
           onSoundControl={handleSoundClick}
           blackDotEffect={blackDotEffect}
           onToggleBlackDotEffect={toggleBlackDotEffect}
+          lightMode={lightMode}
+          onToggleLightMode={toggleLightMode}
         />
       )}
   
@@ -354,12 +372,12 @@ function App() {
       />
   
       {showNodes && (
-        <div className="game-box">
-          <div className="game-row">{createTopRow(topRowCount)}</div>
+      <div className="game-box">
+        <div className="game-row">{createTopRow(topRowCount)}</div>
           <svg ref={svgRef} className="svg-overlay" />
-          <div className="game-row bottom-row">{createBottomRow(bottomRowCount)}</div>
-        </div>
-      )}
+        <div className="game-row bottom-row">{createBottomRow(bottomRowCount)}</div>
+      </div>
+    )}
     </div>
   );
 }
