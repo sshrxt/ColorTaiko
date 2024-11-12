@@ -23,24 +23,40 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, positi
         opacity: isSelected ? 1 : isFaded ? 0.5 : 1,
         width: `${nodeSize}px`,
         height: `${nodeSize}px`,
+        position: 'relative', // Ensure the dot can be positioned inside the node
       }}
     >
       {position === "top" && (
-        <span style={{ position: "absolute", top: "-30px", fontSize: '20px', color: lightMode ? 'black' : 'white', fontFamily: "'STIX Two Math', serif", userSelect: "none"   }}>
+        <span style={{ position: "absolute", top: "-30px", fontSize: '20px', color: lightMode ? 'black' : 'white', fontFamily: "'STIX Two Math', serif", userSelect: "none" }}>
           {label}
         </span>
       )}
       <div style={{ width: '100%', height: '100%' }} />
       {position === "bottom" && (
-        <span style={{ position: "absolute", bottom: "-30px", fontSize: '20px', color: lightMode ? 'black' : 'white', fontFamily: "'STIX Two Math', serif", userSelect: "none"  }}>
+        <span style={{ position: "absolute", bottom: "-30px", fontSize: '20px', color: lightMode ? 'black' : 'white', fontFamily: "'STIX Two Math', serif", userSelect: "none" }}>
           {label}
         </span>
       )}
-      {blackDotEffect && <div className="black-dot"></div>}
 
+      {/* Add a black dot when the node is selected */}
+      {isSelected && (
+        <div className="black-dot" style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '10px', // Adjust dot size
+          height: '10px',
+          borderRadius: '50%',
+          backgroundColor: 'black',
+        }} />
+      )}
+
+      {blackDotEffect && !isSelected && <div className="black-dot"></div>}
     </div>
   );
 };
+
 TaikoNode.propTypes = {
   id: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
