@@ -16,11 +16,14 @@ export const checkAndGroupConnections = (
     const matchingGroups = [];
     const groupTop = groupMapRef.current.get(topCombination);
     const groupBottom = groupMapRef.current.get(bottomCombination);
-  
-    if (groupBottom) matchingGroups.push(groupBottom);
+    console.log('ok');
+    if (groupBottom) {
+      console.log('Group Bottom:', groupBottom);
+      matchingGroups.push(groupBottom);
+    }
     if (groupTop && groupTop !== groupBottom) matchingGroups.push(groupTop);
   
-    //console.log('Matching Groups:', matchingGroups);
+    console.log('Matching Groups:', matchingGroups);
     let mergedGroup = null;
     if (matchingGroups.length > 0) {
       mergedGroup = matchingGroups[0];
@@ -36,8 +39,8 @@ export const checkAndGroupConnections = (
         new Set([...mergedGroup.nodes, top1, top2, bottom1, bottom2])
       );
   
-      for (let i = 1; i < matchingGroups.length; i++) {
-        const groupToMerge = matchingGroups[i];
+      if (matchingGroups.length > 1) {
+        const groupToMerge = matchingGroups[1];
         groupToMerge.pairs.forEach((connection) => {
           connection.color = mergedGroup.color;
         });
@@ -47,17 +50,17 @@ export const checkAndGroupConnections = (
         mergedGroup.pairs = Array.from(
           new Set([...mergedGroup.pairs, ...groupToMerge.pairs])
         );
+        groupMapRef.current.forEach((group, key) => {
+          if (group === groupToMerge) {
+            groupMapRef.current.set(key, mergedGroup);
+          }
+        });
       }
   
-      groupMapRef.current.forEach((group, key) => {
-        if (matchingGroups.includes(group) && group !== mergedGroup) {
-          groupMapRef.current.delete(key);
-        }
-      });
   
       groupMapRef.current.set(topCombination, mergedGroup);
       groupMapRef.current.set(bottomCombination, mergedGroup);
-  
+      // console.log('ok63');
       console.log('Merged Group:', mergedGroup);
       console.log('GroupMap', groupMapRef.current);
     } else {
