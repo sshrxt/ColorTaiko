@@ -322,7 +322,7 @@ function App() {
       setEdgeState(null);
     } else {
       // If no pending edge, create a new edge and add to edgeState
-      newColor = generateColor(currentColor, setCurrentColor);
+      newColor = generateColor(currentColor, setCurrentColor, connectionPairs);
       //console.log("newColor: ", newColor);
       //console.log(newColor);
       const newConnection = {
