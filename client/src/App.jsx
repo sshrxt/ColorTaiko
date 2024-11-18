@@ -37,11 +37,12 @@ function App() {
   const groupMapRef = useRef(new Map());
   const previousProgressRef = useRef(progress);
   const [currentStage, setCurrentStage] = useState(1);
+  const [highlightedNodes, setHighlightedNodes] = useState([]);
 
   // Custom hooks for managing audio and settings
   const { clickAudio, errorAudio, connectsuccess, perfectAudio} = useAudio();
   const { offset, setOffset, soundBool, setSoundBool, blackDotEffect, setBlackDotEffect,
-          lightMode, setLightMode
+          lightMode, setLightMode, highlightConnections, setHighlightConnections
         }  = useSettings();
 
   // References for SVG elements and connection groups
@@ -155,6 +156,7 @@ function App() {
         position="top"
         blackDotEffect={blackDotEffect}
         lightMode={lightMode}
+        isHighlighted={highlightedNodes.includes(`top-${i}`)}
       />
     ));
 
@@ -171,19 +173,68 @@ function App() {
         position="bottom"
         blackDotEffect={blackDotEffect}
         lightMode={lightMode}
+        isHighlighted={highlightedNodes.includes(`bottom-${i}`)}
       />
     ));
 
+    // const handleNodeClick = (nodeId) => {
+    //   setErrorMessage("");
+    //   if (soundBool) clickAudio.play();
+    //   if (selectedNodes.includes(nodeId)) {
+    //     setSelectedNodes(selectedNodes.filter((id) => id !== nodeId));
+    //     setHighlightConnections([]);
+    //   } else if (selectedNodes.length < 2) {
+    //     const newSelectedNodes = [...selectedNodes, nodeId];
+    //     setSelectedNodes(newSelectedNodes);
+    //     if (newSelectedNodes.length === 2) tryConnect(newSelectedNodes);
+    //   }
+    // };
     const handleNodeClick = (nodeId) => {
       setErrorMessage("");
+    
+      // Play click audio if sound is enabled
       if (soundBool) clickAudio.play();
+    
+      // If the node is already selected, deselect it and clear highlights
       if (selectedNodes.includes(nodeId)) {
         setSelectedNodes(selectedNodes.filter((id) => id !== nodeId));
-      } else if (selectedNodes.length < 2) {
+        setHighlightedNodes([]); // Clear highlighted nodes
+      } 
+      // If less than 2 nodes are selected, process the selection
+      else if (selectedNodes.length < 2) {
         const newSelectedNodes = [...selectedNodes, nodeId];
         setSelectedNodes(newSelectedNodes);
-        if (newSelectedNodes.length === 2) tryConnect(newSelectedNodes);
+    
+        // If one node is selected, highlight connected nodes
+        if (newSelectedNodes.length === 1) {
+          const connectedNodes = getConnectedNodes(nodeId, connectionPairs); // Use refined utility function
+          setHighlightedNodes(connectedNodes); // Highlight nodes connected to the first selected node
+        }
+    
+        // If two nodes are selected, attempt a connection
+        if (newSelectedNodes.length === 2) {
+          tryConnect(newSelectedNodes);
+          setHighlightedNodes([]); // Clear highlights after a connection attempt
+        }
       }
+    };
+
+    const getConnectedNodes = (selectedNode, connectionPairs) => {
+      if (!selectedNode) return [];
+    
+      // Determine if the selected node is from the top or bottom row
+      const isTopNode = selectedNode.startsWith("top");
+      const isBottomNode = selectedNode.startsWith("bottom");
+    
+      // Filter connections to find nodes from the opposite row
+      return connectionPairs
+        .flat() // Flatten connection pairs into a single array of connections
+        .filter((conn) => conn.nodes.includes(selectedNode)) // Find connections involving the selected node
+        .flatMap((conn) =>
+          conn.nodes.filter((node) =>
+            isTopNode ? node.startsWith("bottom") : node.startsWith("top")
+          )
+        );
     };
 
   const handleToolMenuClick = () => setShowSettings((prev) => !prev);
@@ -321,6 +372,15 @@ function App() {
     setSelectedNodes([]);
   };
 
+  const getHighlightedNodes = (selectedNode) => {
+    if (!highlightConnections || !selectedNode) return [];
+    
+    return connections
+      .filter((conn) => conn.nodes.includes(selectedNode)) // Find connections involving the selected node
+      .flatMap((conn) => conn.nodes) // Extract connected nodes
+      .filter((node) => node !== selectedNode); // Exclude the selected node itself
+  };
+
   if (lightMode) {
     document.body.classList.add('light-mode');
   } else {
@@ -366,6 +426,7 @@ function App() {
           onToggleBlackDotEffect={toggleBlackDotEffect}
           lightMode={lightMode}
           onToggleLightMode={toggleLightMode}
+          highlightConnections={highlightConnections}
         />
       )}
   
