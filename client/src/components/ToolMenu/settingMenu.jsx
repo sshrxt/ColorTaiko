@@ -10,7 +10,6 @@ const SettingsMenu = ({
   onToggleBlackDotEffect,
   lightMode,
   onToggleLightMode,
-  highlightConnections
 }) => {
   const handleOffsetInput = (e) => {
     const newOffset = parseInt(e.target.value, 10);
@@ -76,16 +75,6 @@ const SettingsMenu = ({
           />
         </label>
       </div>
-      <div style={{ marginTop: "10px" }}>
-      <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-      Highlight Connections
-      <input
-        type="checkbox"
-        checked={highlightConnections}
-        onChange={() => setHighlightConnections((prev) => !prev)}
-      />
-     </label>
-      </div>
     </div>
   );
 };
@@ -98,6 +87,5 @@ SettingsMenu.propTypes = {
   onToggleBlackDotEffect: PropTypes.func.isRequired,
   lightMode: PropTypes.bool.isRequired,
   onToggleLightMode: PropTypes.func.isRequired,
-  highlightConnections: PropTypes.bool.isRequired,
 };
 export default SettingsMenu;

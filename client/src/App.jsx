@@ -5,6 +5,7 @@ import { drawConnections } from "./utils/drawingUtils";
 import { checkAndGroupConnections } from "./utils/MergeUtils";
 import { calculateProgress } from "./utils/calculateProgress";
 import { checkAndAddNewNodes} from "./utils/checkAndAddNewNodes";
+import { getConnectedNodes } from "./utils/getConnectedNodes";
 
 import SettingIconImage from "./assets/setting-icon.png";
 
@@ -13,8 +14,6 @@ import ErrorModal from "./components/ErrorModal";
 import SettingsMenu from "./components/ToolMenu/settingMenu";
 import ProgressBar from "./components/ProgressBar/progressBar";
 import Title from "./components/title";
-import StageIndicator from "./components/StageIndicator/stageIndicator";
-
 import { useAudio } from './hooks/useAudio';
 import { useSettings } from './hooks/useSetting';
 
@@ -36,13 +35,12 @@ function App() {
   const svgRef = useRef(null);
   const groupMapRef = useRef(new Map());
   const previousProgressRef = useRef(progress);
-  const [currentStage, setCurrentStage] = useState(1);
   const [highlightedNodes, setHighlightedNodes] = useState([]);
 
   // Custom hooks for managing audio and settings
   const { clickAudio, errorAudio, connectsuccess, perfectAudio} = useAudio();
   const { offset, setOffset, soundBool, setSoundBool, blackDotEffect, setBlackDotEffect,
-          lightMode, setLightMode, highlightConnections, setHighlightConnections
+          lightMode, setLightMode
         }  = useSettings();
 
   // References for SVG elements and connection groups
@@ -177,18 +175,6 @@ function App() {
       />
     ));
 
-    // const handleNodeClick = (nodeId) => {
-    //   setErrorMessage("");
-    //   if (soundBool) clickAudio.play();
-    //   if (selectedNodes.includes(nodeId)) {
-    //     setSelectedNodes(selectedNodes.filter((id) => id !== nodeId));
-    //     setHighlightConnections([]);
-    //   } else if (selectedNodes.length < 2) {
-    //     const newSelectedNodes = [...selectedNodes, nodeId];
-    //     setSelectedNodes(newSelectedNodes);
-    //     if (newSelectedNodes.length === 2) tryConnect(newSelectedNodes);
-    //   }
-    // };
     const handleNodeClick = (nodeId) => {
       setErrorMessage("");
     
@@ -217,24 +203,6 @@ function App() {
           setHighlightedNodes([]); // Clear highlights after a connection attempt
         }
       }
-    };
-
-    const getConnectedNodes = (selectedNode, connectionPairs) => {
-      if (!selectedNode) return [];
-    
-      // Determine if the selected node is from the top or bottom row
-      const isTopNode = selectedNode.startsWith("top");
-      const isBottomNode = selectedNode.startsWith("bottom");
-    
-      // Filter connections to find nodes from the opposite row
-      return connectionPairs
-        .flat() // Flatten connection pairs into a single array of connections
-        .filter((conn) => conn.nodes.includes(selectedNode)) // Find connections involving the selected node
-        .flatMap((conn) =>
-          conn.nodes.filter((node) =>
-            isTopNode ? node.startsWith("bottom") : node.startsWith("top")
-          )
-        );
     };
 
   const handleToolMenuClick = () => setShowSettings((prev) => !prev);
@@ -273,9 +241,6 @@ function App() {
     setLightMode((prevMode) => !prevMode);
   };
 
-  const handleStageClick = (stage) => {
-    setCurrentStage(stage);
-  };
 
 
   const tryConnect = (nodes) => {
@@ -372,15 +337,6 @@ function App() {
     setSelectedNodes([]);
   };
 
-  const getHighlightedNodes = (selectedNode) => {
-    if (!highlightConnections || !selectedNode) return [];
-    
-    return connections
-      .filter((conn) => conn.nodes.includes(selectedNode)) // Find connections involving the selected node
-      .flatMap((conn) => conn.nodes) // Extract connected nodes
-      .filter((node) => node !== selectedNode); // Exclude the selected node itself
-  };
-
   if (lightMode) {
     document.body.classList.add('light-mode');
   } else {
@@ -390,8 +346,6 @@ function App() {
   return (
     <div className={`app-container ${lightMode ? 'light-mode' : 'dark-mode'}`}>
       <Title />
-
-      <StageIndicator currentStage={currentStage} onStageClick={handleStageClick} />
   
       <ProgressBar
         progress={progress}
@@ -402,7 +356,7 @@ function App() {
       />
   
       {welcomeMessage && (
-        <div className="welcome-message fade-message">Connect the nodes!</div>
+        <div className="welcome-message fade-message">Connect the vertices!</div>
       )}
 
       {Percent100Message && (
@@ -426,7 +380,6 @@ function App() {
           onToggleBlackDotEffect={toggleBlackDotEffect}
           lightMode={lightMode}
           onToggleLightMode={toggleLightMode}
-          highlightConnections={highlightConnections}
         />
       )}
   

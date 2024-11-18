@@ -21,11 +21,6 @@ export function useSettings() {
     return savedLightMode ? JSON.parse(savedLightMode) : false;
   });
 
-  const [highlightConnections, setHighlightConnections] = useState(() => {
-    const savedHighlightConnections = localStorage.getItem("highlightConnections");
-    return savedHighlightConnections ? JSON.parse(savedHighlightConnections) : true;
-  });
-
   useEffect(() => {
     localStorage.setItem("sound", soundBool);
   }, [soundBool]);
@@ -38,9 +33,5 @@ export function useSettings() {
     localStorage.setItem("lightMode", JSON.stringify(lightMode));
   }, [lightMode]);
 
-  useEffect(() => {
-    localStorage.setItem("highlightConnections", JSON.stringify(highlightConnections));
-  }, [highlightConnections]);
-
-  return { offset, setOffset, soundBool, setSoundBool, blackDotEffect, setBlackDotEffect, lightMode, setLightMode, highlightConnections, setHighlightConnections };
+  return { offset, setOffset, soundBool, setSoundBool, blackDotEffect, setBlackDotEffect, lightMode, setLightMode };
 }
