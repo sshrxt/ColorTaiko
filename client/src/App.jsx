@@ -5,6 +5,7 @@ import { drawConnections } from "./utils/drawingUtils";
 import { checkAndGroupConnections } from "./utils/MergeUtils";
 import { calculateProgress } from "./utils/calculateProgress";
 import { checkAndAddNewNodes} from "./utils/checkAndAddNewNodes";
+import { getConnectedNodes } from "./utils/getConnectedNodes";
 
 import SettingIconImage from "./assets/setting-icon.png";
 
@@ -13,8 +14,6 @@ import ErrorModal from "./components/ErrorModal";
 import SettingsMenu from "./components/ToolMenu/settingMenu";
 import ProgressBar from "./components/ProgressBar/progressBar";
 import Title from "./components/title";
-import StageIndicator from "./components/StageIndicator/stageIndicator";
-
 import { useAudio } from './hooks/useAudio';
 import { useSettings } from './hooks/useSetting';
 
@@ -36,7 +35,7 @@ function App() {
   const svgRef = useRef(null);
   const groupMapRef = useRef(new Map());
   const previousProgressRef = useRef(progress);
-  const [currentStage, setCurrentStage] = useState(1);
+  const [highlightedNodes, setHighlightedNodes] = useState([]);
 
   // Custom hooks for managing audio and settings
   const { clickAudio, errorAudio, connectsuccess, perfectAudio} = useAudio();
@@ -155,6 +154,7 @@ function App() {
         position="top"
         blackDotEffect={blackDotEffect}
         lightMode={lightMode}
+        isHighlighted={highlightedNodes.includes(`top-${i}`)}
       />
     ));
 
@@ -171,18 +171,37 @@ function App() {
         position="bottom"
         blackDotEffect={blackDotEffect}
         lightMode={lightMode}
+        isHighlighted={highlightedNodes.includes(`bottom-${i}`)}
       />
     ));
 
     const handleNodeClick = (nodeId) => {
       setErrorMessage("");
+    
+      // Play click audio if sound is enabled
       if (soundBool) clickAudio.play();
+    
+      // If the node is already selected, deselect it and clear highlights
       if (selectedNodes.includes(nodeId)) {
         setSelectedNodes(selectedNodes.filter((id) => id !== nodeId));
-      } else if (selectedNodes.length < 2) {
+        setHighlightedNodes([]); // Clear highlighted nodes
+      } 
+      // If less than 2 nodes are selected, process the selection
+      else if (selectedNodes.length < 2) {
         const newSelectedNodes = [...selectedNodes, nodeId];
         setSelectedNodes(newSelectedNodes);
-        if (newSelectedNodes.length === 2) tryConnect(newSelectedNodes);
+    
+        // If one node is selected, highlight connected nodes
+        if (newSelectedNodes.length === 1) {
+          const connectedNodes = getConnectedNodes(nodeId, connectionPairs); // Use refined utility function
+          setHighlightedNodes(connectedNodes); // Highlight nodes connected to the first selected node
+        }
+    
+        // If two nodes are selected, attempt a connection
+        if (newSelectedNodes.length === 2) {
+          tryConnect(newSelectedNodes);
+          setHighlightedNodes([]); // Clear highlights after a connection attempt
+        }
       }
     };
 
@@ -222,9 +241,6 @@ function App() {
     setLightMode((prevMode) => !prevMode);
   };
 
-  const handleStageClick = (stage) => {
-    setCurrentStage(stage);
-  };
 
 
   const tryConnect = (nodes) => {
@@ -306,7 +322,7 @@ function App() {
       setEdgeState(null);
     } else {
       // If no pending edge, create a new edge and add to edgeState
-      newColor = generateColor(currentColor, setCurrentColor);
+      newColor = generateColor(currentColor, setCurrentColor, connectionPairs);
       //console.log("newColor: ", newColor);
       //console.log(newColor);
       const newConnection = {
@@ -330,8 +346,6 @@ function App() {
   return (
     <div className={`app-container ${lightMode ? 'light-mode' : 'dark-mode'}`}>
       <Title />
-
-      <StageIndicator currentStage={currentStage} onStageClick={handleStageClick} />
   
       <ProgressBar
         progress={progress}
@@ -342,7 +356,7 @@ function App() {
       />
   
       {welcomeMessage && (
-        <div className="welcome-message fade-message">Connect the nodes!</div>
+        <div className="welcome-message fade-message">Connect the vertices!</div>
       )}
 
       {Percent100Message && (

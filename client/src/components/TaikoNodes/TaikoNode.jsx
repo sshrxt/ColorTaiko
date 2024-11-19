@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useState, useEffect } from 'react';
 import './taikoNode.css';
 
-const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, position, blackDotEffect, lightMode}) => {
+const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, position, blackDotEffect, lightMode, isHighlighted}) => {
   const [entering, setEntering] = useState(true);
 
   useEffect(() => {
@@ -19,11 +19,16 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, positi
       onClick={onClick}
       className={`taiko-node ${entering ? 'taiko-node-enter' : ''}`}
       style={{
-        backgroundColor: isSelected ? 'yellow' : isFaded ? '#939799' : 'white',
+        backgroundColor: isSelected
+          ? "yellow"
+          : isHighlighted
+          ? "yellow"
+          : isFaded
+          ? "#939799"
+          : "white",
         opacity: isSelected ? 1 : isFaded ? 0.5 : 1,
         width: `${nodeSize}px`,
         height: `${nodeSize}px`,
-        position: 'relative', // Ensure the dot can be positioned inside the node
       }}
     >
       {position === "top" && (
@@ -36,20 +41,6 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, positi
         <span style={{ position: "absolute", bottom: "-30px", fontSize: '20px', color: lightMode ? 'black' : 'white', fontFamily: "'STIX Two Math', serif", userSelect: "none" }}>
           {label}
         </span>
-      )}
-
-      {/* Add a black dot when the node is selected */}
-      {isSelected && (
-        <div className="black-dot" style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '10px', // Adjust dot size
-          height: '10px',
-          borderRadius: '50%',
-          backgroundColor: 'black',
-        }} />
       )}
 
       {blackDotEffect && !isSelected && <div className="black-dot"></div>}
@@ -67,5 +58,6 @@ TaikoNode.propTypes = {
   position: PropTypes.oneOf(["top", "bottom"]).isRequired,
   blackDotEffect: PropTypes.bool.isRequired,
   lightMode: PropTypes.bool.isRequired,
+  isHighlighted: PropTypes.bool.isRequired,
 };
 export default TaikoNode;

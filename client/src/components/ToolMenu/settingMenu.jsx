@@ -9,7 +9,7 @@ const SettingsMenu = ({
   blackDotEffect,
   onToggleBlackDotEffect,
   lightMode,
-  onToggleLightMode
+  onToggleLightMode,
 }) => {
   const handleOffsetInput = (e) => {
     const newOffset = parseInt(e.target.value, 10);
