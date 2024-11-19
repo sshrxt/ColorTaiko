@@ -12,6 +12,18 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, positi
 
   const nodeSize = Math.max(30, 100 / totalCount);
   const label = position === "top" ? `b${index + 1}` : `a${index + 1}`;
+  const [backgroundColor, setBackgroundColor] = useState("black")
+
+  useEffect(()=> {
+    if(backgroundColor == "white"){
+      setBackgroundColor('black')
+    }
+    else{
+      setBackgroundColor("white")
+    }
+    console.log(backgroundColor)
+  }, [lightMode])
+
 
   return (
     <div
@@ -20,12 +32,12 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, positi
       className={`taiko-node ${entering ? 'taiko-node-enter' : ''}`}
       style={{
         backgroundColor: isSelected
-          ? "yellow"
+          ? "#FF69B4"
           : isHighlighted
-          ? "yellow"
+          ? "#FF69B4"
           : isFaded
           ? "#939799"
-          : "white",
+          : `${backgroundColor}`,
         opacity: isSelected ? 1 : isFaded ? 0.5 : 1,
         width: `${nodeSize}px`,
         height: `${nodeSize}px`,
