@@ -348,6 +348,8 @@ function App() {
     // Add to global connections for tracking purposes
     setConnections([...connections, { nodes: [node1, node2], color: edgeState ? edgeState.color : newColor }]);
     setSelectedNodes([]);
+    console.log(connectionPairs);
+
   };
   
 
@@ -356,7 +358,6 @@ function App() {
   } else {
     document.body.classList.remove('light-mode');
   }
-  console.log(connectionPairs);
   return (
     <div className={`app-container ${lightMode ? 'light-mode' : 'dark-mode'}`}>
       <Title />
