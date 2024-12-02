@@ -10,6 +10,15 @@
   width: 150px; /* Adjust as needed */
   height: 85px;
 }
+@media (max-width: 850px) {
+  .progress-bar-container{
+    top: 60px;
+  }
+  .text {
+    position: absolute;
+    top: 70px;
+  }
+}
 
 .progress-bar-container {
     width: 20%;

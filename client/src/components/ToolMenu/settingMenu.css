@@ -10,6 +10,12 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 1000;
   }
+@media (max-width: 850px) {
+  .settings-menu {
+    top: 130px;
+  }
+  
+}
   
   .settings-menu h3 {
     color: black;

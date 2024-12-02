@@ -119,10 +119,10 @@ function App() {
    * for debugging purposes
    */
 
-  // useEffect(() => {
-  //   console.log("Connections",connections);
-  //   console.log("Connection Pairs",connectionPairs);
-  // } , [connections]);
+  useEffect(() => {
+    console.log("Connections",connections);
+    console.log("Connection Pairs",connectionPairs);
+  } , [connections]);
 
 
   /**
@@ -245,111 +245,96 @@ function App() {
 
   const tryConnect = (nodes) => {
     if (nodes.length !== 2) return;
-  
     let [node1, node2] = nodes;
     const isTopNode = (id) => id.startsWith("top");
     const isBottomNode = (id) => id.startsWith("bottom");
-  
-    // Ensure node1 is always top and node2 is bottom for consistency
+
     if (isBottomNode(node1) && isTopNode(node2)) {
       [node1, node2] = [node2, node1];
     }
-  
-    // Validate that nodes are not from the same row
+
     if (
       (isTopNode(node1) && isTopNode(node2)) ||
       (isBottomNode(node1) && isBottomNode(node2))
     ) {
-      if (soundBool) errorAudio.play();
+      if(soundBool) {
+        errorAudio.play();
+      }
       setErrorMessage("Can't connect two vertices from the same row.");
       setSelectedNodes([]);
       return;
     }
-  
-    // Check for duplicate connections
+
     const isDuplicate = connections.some(
       (conn) =>
         (conn.nodes.includes(node1) && conn.nodes.includes(node2)) ||
         (conn.nodes.includes(node2) && conn.nodes.includes(node1))
     );
+
     if (isDuplicate) {
-      if (soundBool) errorAudio.play();
+      if(soundBool) {
+        errorAudio.play();
+      }
       setErrorMessage("These vertices are already connected.");
       setSelectedNodes([]);
       return;
     }
-  
-    // Prevent two edges in a pair from sharing a common vertex
+
     if (
       edgeState &&
       (edgeState.nodes.includes(node1) || edgeState.nodes.includes(node2))
     ) {
-      if (soundBool) errorAudio.play();
+      if(soundBool) {
+        errorAudio.play();
+      }
       setErrorMessage(
-        "Two vertical edges in each pair should not share a common vertex."
+        "Two vertical edges in each pair should not share a common vertex"
       );
       setSelectedNodes([]);
       return;
     }
-  
-    const determineOrientation = (top1, top2, bottom1, bottom2) => {
-      // Determine the direction for top and bottom nodes
-      let topOrientation = "right";
-      let bottomOrientation = "right";
-      if(bottom1 > bottom2) {
-        topOrientation = "left";
-      }
-      if(top1 > top2) {
-        topOrientation = "left";
-      }
 
-
-      return { top: topOrientation, bottom: bottomOrientation };
-    };
-  
+    let newColor;
     if (edgeState) {
-      // There is a pending edge, create a new pair
-      const newConnection = {
-        nodes: [node1, node2],
-        color: edgeState.color,
-      };
-  
-      const orientation = determineOrientation(
-        edgeState.nodes[0],
-        node1,
-        edgeState.nodes[1],
-        node2
-      );
-  
-      // Add the new pair to connectionPairs
-      setConnectionPairs([
-        ...connectionPairs,
-        {
-          connections: [edgeState, newConnection],
-          color: edgeState.color,
-          topOrientation: orientation.top,
-          bottomOrientation: orientation.bottom,
-        },
-      ]);
-  
-      // Clear edgeState
-      setEdgeState(null);
-    } else {
-      // No pending edge, create a new connection and store in edgeState
-      const newColor = generateColor(currentColor, setCurrentColor, connectionPairs);
+      // If there is a pending edge, use the same color and create a pair
+      newColor = edgeState.color;
       const newConnection = {
         nodes: [node1, node2],
         color: newColor,
       };
+      setConnections([...connections, newConnection]);
+      setConnectionPairs((prevPairs) => {
+        const lastPair = prevPairs[prevPairs.length - 1];
+        let updatedPairs;
+        if (lastPair && lastPair.length === 1) {
+          // If the last pair has one connection, complete it
+          updatedPairs = [
+            ...prevPairs.slice(0, -1),
+            [...lastPair, newConnection],
+          ];
+        } else {
+          // Otherwise, create a new pair
+          updatedPairs = [...prevPairs, [edgeState, newConnection]];
+        }
+        return updatedPairs;
+      });
+      //.log(connectionPairs);
+      setEdgeState(null);
+    } else {
+      // If no pending edge, create a new edge and add to edgeState
+      newColor = generateColor(currentColor, setCurrentColor, connectionPairs);
+      //console.log("newColor: ", newColor);
+      //console.log(newColor);
+      const newConnection = {
+        nodes: [node1, node2],
+        color: newColor,
+      };
+      setConnections([...connections, newConnection]);
+      // Create a new pair and add to the connection pairs
+      setConnectionPairs([...connectionPairs, [newConnection]]);
       setEdgeState(newConnection);
     }
-    const newColor = generateColor(currentColor, setCurrentColor, connectionPairs);
-
-    // Add to global connections for tracking purposes
-    setConnections([...connections, { nodes: [node1, node2], color: edgeState ? edgeState.color : newColor }]);
     setSelectedNodes([]);
-    console.log(connectionPairs);
-
   };
   
 

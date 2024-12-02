@@ -21,7 +21,7 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, positi
     else{
       setBackgroundColor("white")
     }
-    console.log(backgroundColor)
+    //console.log(backgroundColor)
   }, [lightMode])
 
 

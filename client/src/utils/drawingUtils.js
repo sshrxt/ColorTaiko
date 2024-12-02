@@ -1,7 +1,7 @@
 /**
  * Draws connection lines and curved paths between nodes on an SVG canvas.
  * @param {Object} svgRef - Reference to the SVG element where connections will be drawn.
- * @param {Array} connections - Array of individual connections to be drawn as straight lines.
+ * @param {Array} connections - Array of connections, each containing nodes to connect and the color of the line.
  * @param {Array} connectionPairs - Array of connection pairs to be drawn with curved paths.
  * @param {number} offset - Distance to offset connection lines from node centers.
  */
@@ -15,7 +15,7 @@ export const drawConnections = (svgRef, connections, connectionPairs, offset) =>
 
   // Retrieve SVG container dimensions to calculate relative node positions
   const svgRect = svgRef.current.getBoundingClientRect();
-
+  
   /**
    * Adjusts start and end points of a line to offset from node centers.
    * @param {number} x1 - X-coordinate of the starting point.
@@ -31,12 +31,12 @@ export const drawConnections = (svgRef, connections, connectionPairs, offset) =>
     const len = Math.sqrt(dx * dx + dy * dy);
     const scale = (len - distance) / len;
     return {
-      x: x1 + dx * scale,
-      y: y1 + dy * scale,
+        x: x1 + dx * scale,
+        y: y1 + dy * scale
     };
   };
 
-  // Draw individual connections as straight lines
+  // Iterate over direct connections to create straight lines between nodes
   connections.forEach(({ nodes: [start, end], color }) => {
     const startElement = document.getElementById(start);
     const endElement = document.getElementById(end);
@@ -50,9 +50,11 @@ export const drawConnections = (svgRef, connections, connectionPairs, offset) =>
       let endX = endRect.left + endRect.width / 2 - svgRect.left;
       let endY = endRect.top + endRect.height / 2 - svgRect.top;
 
+      // Adjust points to be offset from node centers
       const adjustedStart = adjustPoint(startX, startY, endX, endY, offset);
       const adjustedEnd = adjustPoint(endX, endY, startX, startY, offset);
 
+      // Create an SVG line element for each connection
       const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
       line.setAttribute("x1", adjustedStart.x);
       line.setAttribute("y1", adjustedStart.y);
@@ -66,48 +68,57 @@ export const drawConnections = (svgRef, connections, connectionPairs, offset) =>
     }
   });
 
-  connectionPairs.forEach(({ connections, color, topOrientation, bottomOrientation }) => {
-    if (connections.length === 2) {
+  // Create curved paths for paired connections, representing grouped edges
+  connectionPairs.forEach((pair) => {
+    if (pair.length === 2) {
       const [
-        { nodes: [topNode1, bottomNode1] },
-        { nodes: [topNode2, bottomNode2] },
-      ] = connections;
-  
+        {
+          nodes: [startNode1, bottomNode1],
+        },
+        {
+          nodes: [startNode2, bottomNode2],
+          color,
+        },
+      ] = pair;
+
+      const topFirst1 = !startNode1.startsWith("bottom");
+      const topFirst2 = !startNode2.startsWith("bottom");
+
       /**
-       * Creates a curved path between two nodes with an arrow.
+       * Generates an SVG path for a curved connection between two nodes.
        * @param {string} startNode - ID of the starting node.
        * @param {string} endNode - ID of the ending node.
        * @param {boolean} isTopCurve - Whether the curve arches upwards or downwards.
-       * @param {string} orientation - Arrow direction ('left' | 'right' | 'up' | 'down').
-       * @returns {Object|null} SVG path and arrow elements or null if nodes are missing.
+       * @returns {Object} SVG path element or null if nodes are missing.
        */
-      const createCurvedPath = (startNode, endNode, isTopCurve, orientation) => {
+      const createCurvedPath = (startNode, endNode, isTopCurve) => {
         const startElement = document.getElementById(startNode);
         const endElement = document.getElementById(endNode);
-  
         if (!startElement || !endElement) return null;
-  
+
         const startRect = startElement.getBoundingClientRect();
         const endRect = endElement.getBoundingClientRect();
-  
+
+        // Calculate center points for the start and end nodes within SVG bounds
         let startX = startRect.left + startRect.width / 2 - svgRect.left;
         let startY = startRect.top + startRect.height / 2 - svgRect.top;
         let endX = endRect.left + endRect.width / 2 - svgRect.left;
         let endY = endRect.top + endRect.height / 2 - svgRect.top;
-  
+
+        // Adjust points to be offset from node centers
         const adjustedStart = adjustPoint(startX, startY, endX, endY, offset);
         const adjustedEnd = adjustPoint(endX, endY, startX, startY, offset);
-  
+
         const dx = adjustedEnd.x - adjustedStart.x;
         const dy = adjustedEnd.y - adjustedStart.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-  
+
         const controlX = (adjustedStart.x + adjustedEnd.x) / 2;
         const controlY = isTopCurve
           ? Math.min(adjustedStart.y, adjustedEnd.y) - distance / 5
           : Math.max(adjustedStart.y, adjustedEnd.y) + distance / 5;
-  
-        // Create path
+
+        // Construct SVG path element with quadratic bezier curve
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         const d = `M ${adjustedStart.x},${adjustedStart.y} Q ${controlX},${controlY} ${adjustedEnd.x},${adjustedEnd.y}`;
         path.setAttribute("d", d);
@@ -115,74 +126,24 @@ export const drawConnections = (svgRef, connections, connectionPairs, offset) =>
         path.setAttribute("fill", "none");
         path.setAttribute("stroke-width", "4");
         path.setAttribute("stroke-linecap", "round");
-  
-        // 获取路径长度和中间点坐标
-        const pathLength = path.getTotalLength();
-        const midPoint = path.getPointAtLength(pathLength / 2);
-        const midX = midPoint.x;
-        const midY = midPoint.y;
 
-        // 算出路径切线的角度
-        const tangentPoint1 = path.getPointAtLength(pathLength / 2 - 1);
-        const tangentPoint2 = path.getPointAtLength(pathLength / 2 + 1);
-        const tangentAngle = Math.atan2(tangentPoint2.y - tangentPoint1.y, tangentPoint2.x - tangentPoint1.x) * (180 / Math.PI);
-
-  
-        // Create arrow
-        const arrow = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-        const arrowSize = 10; // Arrow size
-        let arrowPoints;
-        if (orientation === "right") {
-          arrowPoints = `
-            ${midX},${midY - arrowSize} 
-            ${midX - arrowSize},${midY} 
-            ${midX},${midY + arrowSize}`;
-        } else if (orientation === "left") {
-          arrowPoints = `
-            ${midX},${midY - arrowSize} 
-            ${midX + arrowSize},${midY} 
-            ${midX},${midY + arrowSize}`;
-        } else {
-          // Default arrow pointing up
-          arrowPoints = `
-            ${midX - arrowSize},${midY + arrowSize} 
-            ${midX + arrowSize},${midY + arrowSize} 
-            ${midX},${midY - arrowSize}`;
-        }
-        arrow.setAttribute("points", arrowPoints);
-        arrow.setAttribute("fill", color);
-        arrow.setAttribute(
-          "transform",
-          `rotate(${tangentAngle}, ${midX}, ${midY})`
-        );
-  
-        return { path, arrow };
+        return path;
       };
 
-      const sortNodes = (nodeA, nodeB) => {
-        const numberA = parseInt(nodeA.split('-')[1], 10);
-        const numberB = parseInt(nodeB.split('-')[1], 10);
-        return numberA < numberB ? [nodeA, nodeB] : [nodeB, nodeA];
-      };
-    // Sort top nodes
-    const [sortedTopNode1, sortedTopNode2] = sortNodes(topNode1, topNode2);
+      // Create and append top and bottom curves for each connection pair
+      const topCurve = createCurvedPath(
+        topFirst1 ? startNode1 : bottomNode1,
+        topFirst2 ? startNode2 : bottomNode2,
+        true 
+      );
+      if (topCurve) svgRef.current.appendChild(topCurve);
 
-    // Sort bottom nodes
-    const [sortedBottomNode1, sortedBottomNode2] = sortNodes(bottomNode1, bottomNode2);
-
-    // Draw top curve with arrow
-    const topCurve = createCurvedPath(sortedTopNode1, sortedTopNode2, true, topOrientation);
-    if (topCurve) {
-      svgRef.current.appendChild(topCurve.path);
-      svgRef.current.appendChild(topCurve.arrow);
-    }
-
-    // Draw bottom curve with arrow
-    const bottomCurve = createCurvedPath(sortedBottomNode1, sortedBottomNode2, false, bottomOrientation);
-    if (bottomCurve) {
-      svgRef.current.appendChild(bottomCurve.path);
-      svgRef.current.appendChild(bottomCurve.arrow);
-    }
+      const bottomCurve = createCurvedPath(
+        topFirst1 ? bottomNode1 : startNode1,
+        topFirst2 ? bottomNode2 : startNode2,
+        false 
+      );
+      if (bottomCurve) svgRef.current.appendChild(bottomCurve);
     }
   });
   

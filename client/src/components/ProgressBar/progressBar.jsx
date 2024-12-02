@@ -19,7 +19,7 @@ const ProgressBar = ({ progress, connections, topRowCount, bottomRowCount, light
 
   return (
     <div style={{ marginTop: '-55px' }}>
-      <p style={{ color: lightMode ? 'black' : '#837b7b', fontSize: '14px', textAlign: 'left', marginBottom: '-5px' }}>
+      <p className="text" style={{ color: lightMode ? 'black' : '#837b7b', fontSize: '14px', textAlign: 'left', marginBottom: '-5px' }}>
         Can you get to 100%?
       </p>
 
