@@ -107,6 +107,19 @@ body {
   filter: invert(1) brightness(0.8);
 }
 
+@media (max-width: 850px) {
+  .clear-button {
+    margin-top: 70px;
+  }
+  .icon {
+    margin-top: 70px;
+    right: 100px;
+  }
+  .game-box {
+    margin-top: 70px;
+  }
+}
+
 .clear-button {
   position: absolute;
   top: 10px;

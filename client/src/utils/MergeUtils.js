@@ -16,14 +16,14 @@ export const checkAndGroupConnections = (
     const matchingGroups = [];
     const groupTop = groupMapRef.current.get(topCombination);
     const groupBottom = groupMapRef.current.get(bottomCombination);
-    console.log('ok');
+    //console.log('ok');
     if (groupBottom) {
-      console.log('Group Bottom:', groupBottom);
+      //console.log('Group Bottom:', groupBottom);
       matchingGroups.push(groupBottom);
     }
     if (groupTop && groupTop !== groupBottom) matchingGroups.push(groupTop);
   
-    console.log('Matching Groups:', matchingGroups);
+    //console.log('Matching Groups:', matchingGroups);
     let mergedGroup = null;
     if (matchingGroups.length > 0) {
       mergedGroup = matchingGroups[0];
@@ -61,8 +61,8 @@ export const checkAndGroupConnections = (
       groupMapRef.current.set(topCombination, mergedGroup);
       groupMapRef.current.set(bottomCombination, mergedGroup);
       // console.log('ok63');
-      console.log('Merged Group:', mergedGroup);
-      console.log('GroupMap', groupMapRef.current);
+      //console.log('Merged Group:', mergedGroup);
+      //console.log('GroupMap', groupMapRef.current);
     } else {
       const groupColor = firstConnection.color;
       newPair.forEach((connection) => (connection.color = groupColor));
