@@ -6,6 +6,7 @@ import { checkAndGroupConnections } from "./utils/MergeUtils";
 import { calculateProgress } from "./utils/calculateProgress";
 import { checkAndAddNewNodes} from "./utils/checkAndAddNewNodes";
 import { getConnectedNodes } from "./utils/getConnectedNodes";
+import { checkOrientation } from "./utils/checkOrientation";
 
 import SettingIconImage from "./assets/setting-icon.png";
 
@@ -36,6 +37,8 @@ function App() {
   const groupMapRef = useRef(new Map());
   const previousProgressRef = useRef(progress);
   const [highlightedNodes, setHighlightedNodes] = useState([]);
+  const topOrientation = useRef(new Map());
+  const botOrientation = useRef(new Map());
 
   // Custom hooks for managing audio and settings
   const { clickAudio, errorAudio, connectsuccess, perfectAudio} = useAudio();
@@ -62,7 +65,7 @@ function App() {
    * Draws connections on the SVG element when related state changes.
    */
   useEffect(() => {
-    drawConnections(svgRef, connections, connectionPairs, offset);
+    drawConnections(svgRef, connections, connectionPairs, offset, topOrientation, botOrientation);
   }, [connectionGroups, connections, topRowCount, bottomRowCount, connectionPairs, offset]);
 
   /**
@@ -119,10 +122,11 @@ function App() {
    * for debugging purposes
    */
 
-  useEffect(() => {
-    console.log("Connections",connections);
-    console.log("Connection Pairs",connectionPairs);
-  } , [connections]);
+  // useEffect(() => {
+  //   console.log("Connections",connections);
+  //   console.log("Connection Pairs",connectionPairs);
+  //   console.log("Connection Groups",groupMapRef);
+  // } , [connections]);
 
 
   /**
@@ -130,7 +134,18 @@ function App() {
    */
   useEffect(() => {
     const latestPair = connectionPairs[connectionPairs.length - 1];
+    // if(groupMapRef.current.size === 0) {
+
+    // }
+
     if (latestPair && latestPair.length === 2) {
+      const a = checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation);
+      if(a == -1){
+        setErrorMessage("You are not allow to do that");
+        setSelectedNodes([]);
+        return;
+      }
+
       checkAndGroupConnections(
         latestPair,
         groupMapRef,
@@ -139,7 +154,26 @@ function App() {
         setConnections
       );
     }
+    console.log("topOrientation",topOrientation);
+    console.log("botOrientation",botOrientation);
+    console.log("groupMapRef",groupMapRef);
   }, [connectionPairs]);
+
+  // useEffect(() => {
+  //   const latestPair = connectionPairs[connectionPairs.length - 1];)
+  //   if (latestPair && latestPair.length === 2){
+  //     checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation);
+  //     if(checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation) == 1){
+  //       setErrorMessage("Flip");
+  //     } else if (checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation) == 2){
+  //       setErrorMessage("Gnorw");
+  //     }
+  //   }
+
+  //   console.log(topOrientation);
+  //   console.log(botOrientation);
+  // }, [connectionPairs]);
+
 
   const createTopRow = (count) =>
     Array.from({ length: count }, (_, i) => (
@@ -199,6 +233,7 @@ function App() {
     
         // If two nodes are selected, attempt a connection
         if (newSelectedNodes.length === 2) {
+          
           tryConnect(newSelectedNodes);
           setHighlightedNodes([]); // Clear highlights after a connection attempt
         }
@@ -219,6 +254,8 @@ function App() {
     setConnectionGroups([]);
     setCurrentColor(0);
     groupMapRef.current.clear();
+    topOrientation.current.clear();
+    botOrientation.current.clear();
     console.log(connectionPairs);
   };
 
@@ -240,7 +277,6 @@ function App() {
   const toggleLightMode = () => {
     setLightMode((prevMode) => !prevMode);
   };
-
 
 
   const tryConnect = (nodes) => {

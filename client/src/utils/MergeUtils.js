@@ -50,6 +50,8 @@ export const checkAndGroupConnections = (
         mergedGroup.pairs = Array.from(
           new Set([...mergedGroup.pairs, ...groupToMerge.pairs])
         );
+        mergedGroup.combinations = new Set([...mergedGroup.combinations, ...groupToMerge.combinations]);
+
         groupMapRef.current.forEach((group, key) => {
           if (group === groupToMerge) {
             groupMapRef.current.set(key, mergedGroup);
@@ -71,6 +73,7 @@ export const checkAndGroupConnections = (
         nodes: [top1, top2, bottom1, bottom2],
         pairs: [...newPair],
         color: groupColor,
+        combinations: new Set([topCombination, bottomCombination]),
       };
   
       groupMapRef.current.set(topCombination, newGroup);

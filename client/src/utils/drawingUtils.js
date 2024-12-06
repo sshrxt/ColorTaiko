@@ -5,7 +5,7 @@
  * @param {Array} connectionPairs - Array of connection pairs to be drawn with curved paths.
  * @param {number} offset - Distance to offset connection lines from node centers.
  */
-export const drawConnections = (svgRef, connections, connectionPairs, offset) => {
+export const drawConnections = (svgRef, connections, connectionPairs, offset, topOrientation, botOrientation, arrowOptions = { color: "red", size: 10 }) => {
   if (!svgRef.current) return;
 
   // Clear existing connections by removing all child elements of the SVG
@@ -81,8 +81,26 @@ export const drawConnections = (svgRef, connections, connectionPairs, offset) =>
         },
       ] = pair;
 
-      const topFirst1 = !startNode1.startsWith("bottom");
-      const topFirst2 = !startNode2.startsWith("bottom");
+      const sortNodes = (nodeA, nodeB) => {
+        const numberA = parseInt(nodeA.split('-')[1], 10);
+        const numberB = parseInt(nodeB.split('-')[1], 10);
+        return numberA < numberB ? [nodeA, nodeB] : [nodeB, nodeA];
+      };
+  
+      // Sort top and bottom nodes
+      const [sortedTopNode1, sortedTopNode2] = sortNodes(startNode1, startNode2);
+      const [sortedBottomNode1, sortedBottomNode2] = sortNodes(bottomNode1, bottomNode2);
+  
+
+      const [firstConnection, secondConnection] = pair;
+      const [top1, bottom1] = firstConnection.nodes;
+      const [top2, bottom2] = secondConnection.nodes;
+    
+      const topCombination = [top1, top2].sort().join(',');
+      const bottomCombination = [bottom1, bottom2].sort().join(',');
+
+      const topDirection = topOrientation.current.get(topCombination);
+      const bottomDirection = botOrientation.current.get(bottomCombination);
 
       /**
        * Generates an SVG path for a curved connection between two nodes.
@@ -91,7 +109,7 @@ export const drawConnections = (svgRef, connections, connectionPairs, offset) =>
        * @param {boolean} isTopCurve - Whether the curve arches upwards or downwards.
        * @returns {Object} SVG path element or null if nodes are missing.
        */
-      const createCurvedPath = (startNode, endNode, isTopCurve) => {
+      const createCurvedPath = (startNode, endNode, isTopCurve, orientation) => {
         const startElement = document.getElementById(startNode);
         const endElement = document.getElementById(endNode);
         if (!startElement || !endElement) return null;
@@ -127,23 +145,69 @@ export const drawConnections = (svgRef, connections, connectionPairs, offset) =>
         path.setAttribute("stroke-width", "4");
         path.setAttribute("stroke-linecap", "round");
 
-        return path;
+        const pathLength = path.getTotalLength();
+        const midPoint = path.getPointAtLength(pathLength / 2);
+        const midX = midPoint.x;
+        const midY = midPoint.y;
+
+        const tangentPoint1 = path.getPointAtLength(pathLength / 2 - 1);
+        const tangentPoint2 = path.getPointAtLength(pathLength / 2 + 1);
+        const tangentAngle = Math.atan2(tangentPoint2.y - tangentPoint1.y, tangentPoint2.x - tangentPoint1.x) * (180 / Math.PI);
+
+        // Create arrow
+        const arrow = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        const arrowSize = 10; // Arrow size
+        let arrowPoints;
+        if (orientation === "right") {
+          arrowPoints = `
+            ${midX},${midY - arrowSize} 
+            ${midX - arrowSize},${midY} 
+            ${midX},${midY + arrowSize}`;
+        } else if (orientation === "left") {
+          arrowPoints = `
+            ${midX},${midY - arrowSize} 
+            ${midX + arrowSize},${midY} 
+            ${midX},${midY + arrowSize}`;
+        } else {
+          // Default arrow pointing up
+          arrowPoints = `
+            ${midX - arrowSize},${midY + arrowSize} 
+            ${midX + arrowSize},${midY + arrowSize} 
+            ${midX},${midY - arrowSize}`;
+        }
+        arrow.setAttribute("points", arrowPoints);
+        arrow.setAttribute("fill", color);
+        arrow.setAttribute(
+          "transform",
+          `rotate(${tangentAngle}, ${midX}, ${midY})`
+        );
+  
+        return { path, arrow };
+
       };
 
       // Create and append top and bottom curves for each connection pair
       const topCurve = createCurvedPath(
-        topFirst1 ? startNode1 : bottomNode1,
-        topFirst2 ? startNode2 : bottomNode2,
-        true 
+        sortedTopNode1,
+        sortedTopNode2,
+        true, // isTopCurve
+        topDirection
       );
-      if (topCurve) svgRef.current.appendChild(topCurve);
-
+      if (topCurve) {
+        svgRef.current.appendChild(topCurve.path);
+        svgRef.current.appendChild(topCurve.arrow);
+      }
+  
       const bottomCurve = createCurvedPath(
-        topFirst1 ? bottomNode1 : startNode1,
-        topFirst2 ? bottomNode2 : startNode2,
-        false 
+        sortedBottomNode1,
+        sortedBottomNode2,
+        false, // isBottomCurve
+        bottomDirection
       );
-      if (bottomCurve) svgRef.current.appendChild(bottomCurve);
+      if (bottomCurve) {
+        svgRef.current.appendChild(bottomCurve.path);
+        svgRef.current.appendChild(bottomCurve.arrow);
+      }
     }
   });
   
