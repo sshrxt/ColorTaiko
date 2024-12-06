@@ -67,88 +67,32 @@ export const checkOrientation = (newPair, groupMapRef, topOrientation, botOrient
             return 0;
         }
 
-        if (groupMapRef.current.get(topCombination).color !== groupMapRef.current.get(bottomCombination).color) {
-            if((((bottom1 < bottom2) 
-                && (top1 < top2)
-                && (botOrientation.current.get(bottomCombination) === topOrientation.current.get(topCombination))))
-            || 
-                (((bottom1 > bottom2) 
-                && (top1 > top2)
-                && (botOrientation.current.get(bottomCombination) === topOrientation.current.get(topCombination))))){
-                    return 0;
-            } else if (((bottom1 < bottom2) 
-                && (top1 < top2)
-                && (botOrientation.current.get(bottomCombination) !== topOrientation.current.get(topCombination)))
-            ||  
-                ((bottom1 > bottom2) 
-                && (top1 > top2)
-                && (botOrientation.current.get(bottomCombination) !== topOrientation.current.get(topCombination)))) 
-            {
-                    //flip all edges with the same color as top
-                    return 1;
-            } else if(((bottom1 < bottom2) 
-                && (top1 > top2)
-                && (botOrientation.current.get(bottomCombination) === topOrientation.current.get(topCombination)))
-            ||
-                ((bottom1 > bottom2) 
-                && (top1 < top2)
-                && (botOrientation.current.get(bottomCombination) === topOrientation.current.get(topCombination)))) 
-                {
-                    //flip all edges with the same color as top
-                    return 1;
-            } else if (((bottom1 < bottom2) 
-                && (top1 > top2)
-                && (botOrientation.current.get(bottomCombination) !== topOrientation.current.get(topCombination)))
-            ||
-                ((bottom1 > bottom2) 
-                && (top1 < top2)
-                && (botOrientation.current.get(bottomCombination) !== topOrientation.current.get(topCombination)))) 
-                {
-                    return 0;
-                }
+        if (topGroup === bottomGroup) {
+            return -1;
+        }
+        const topDir = topOrientation.current.get(topCombination);
+        console.log(topDir);
+        const botDir = botOrientation.current.get(bottomCombination);
+        console.log(botDir);
+        const isCrossed = (bottom1 < bottom2 && top1 > top2) || (bottom1 > bottom2 && top1 < top2);
 
-        } else             
-        
-            if((((bottom1 < bottom2) 
-                && (top1 < top2)
-                && (botOrientation.current.get(bottomCombination) === topOrientation.current.get(topCombination))))
-            || 
-                (((bottom1 > bottom2) 
-                && (top1 > top2)
-                && (botOrientation.current.get(bottomCombination) === topOrientation.current.get(topCombination))))){
-                    return 0;
-            } else if (((bottom1 < bottom2) 
-                && (top1 < top2)
-                && (botOrientation.current.get(bottomCombination) !== topOrientation.current.get(topCombination)))
-            ||  
-                ((bottom1 > bottom2) 
-                && (top1 > top2)
-                && (botOrientation.current.get(bottomCombination) !== topOrientation.current.get(topCombination)))) 
-            {
-                    //flip all edges with the same color as top
-                    return 2;
-            } else if(((bottom1 < bottom2) 
-                && (top1 > top2)
-                && (botOrientation.current.get(bottomCombination) === topOrientation.current.get(topCombination)))
-            ||
-                ((bottom1 > bottom2) 
-                && (top1 < top2)
-                && (botOrientation.current.get(bottomCombination) === topOrientation.current.get(topCombination)))) 
-                {
-                    //flip all edges with the same color as top
-                    return 2;
-            } else if (((bottom1 < bottom2) 
-                && (top1 > top2)
-                && (botOrientation.current.get(bottomCombination) !== topOrientation.current.get(topCombination)))
-            ||
-                ((bottom1 > bottom2) 
-                && (top1 < top2)
-                && (botOrientation.current.get(bottomCombination) !== topOrientation.current.get(topCombination)))) 
-                {
-                    return 0;
+        if (isCrossed) {
+            // 需要翻转 topGroup 中所有 combination 的方向
+            for (const combo of topGroup.combinations) {
+                console.log(combo);
+                if (topOrientation.current.has(combo)) {
+                    const dir = topOrientation.current.get(combo);
+                    topOrientation.current.set(combo, dir === "right" ? "left" : "right");
                 }
-}
-
-    return 0;
+                if (botOrientation.current.has(combo)) {
+                    const dir = botOrientation.current.get(combo);
+                    botOrientation.current.set(combo, dir === "right" ? "left" : "right");
+                }
+            }
+            return 0;
+        }
+    
+        return 0;
+    }
 };
 

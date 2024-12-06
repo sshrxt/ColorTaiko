@@ -122,11 +122,11 @@ function App() {
    * for debugging purposes
    */
 
-  useEffect(() => {
-    console.log("Connections",connections);
-    console.log("Connection Pairs",connectionPairs);
-    console.log("Connection Groups",groupMapRef);
-  } , [connections]);
+  // useEffect(() => {
+  //   console.log("Connections",connections);
+  //   console.log("Connection Pairs",connectionPairs);
+  //   console.log("Connection Groups",groupMapRef);
+  // } , [connections]);
 
 
   /**
@@ -139,13 +139,9 @@ function App() {
     // }
 
     if (latestPair && latestPair.length === 2) {
-      checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation);
-      if(checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation) == 1){
-        setErrorMessage("Flip");
-        setSelectedNodes([]);
-        return;
-      } else if (checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation) == 2){
-        setErrorMessage("Gnorw");
+      const a = checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation);
+      if(a == -1){
+        setErrorMessage("You are not allow to do that");
         setSelectedNodes([]);
         return;
       }
@@ -158,9 +154,9 @@ function App() {
         setConnections
       );
     }
-    console.log(topOrientation);
-    console.log(botOrientation);
-    console.log(groupMapRef);
+    console.log("topOrientation",topOrientation);
+    console.log("botOrientation",botOrientation);
+    console.log("groupMapRef",groupMapRef);
   }, [connectionPairs]);
 
   // useEffect(() => {
