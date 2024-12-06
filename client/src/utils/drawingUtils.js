@@ -65,6 +65,7 @@ export const drawConnections = (svgRef, connections, connectionPairs, offset, to
       line.setAttribute("stroke-linecap", "round");
 
       svgRef.current.appendChild(line);
+      
     }
   });
 

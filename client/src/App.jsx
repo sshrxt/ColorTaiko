@@ -19,7 +19,6 @@ import { useAudio } from './hooks/useAudio';
 import { useSettings } from './hooks/useSetting';
 
 
-
 function App() {
   // Game state management
   const [topRowCount, setTopRowCount] = useState(1);
@@ -39,6 +38,12 @@ function App() {
   const [highlightedNodes, setHighlightedNodes] = useState([]);
   const topOrientation = useRef(new Map());
   const botOrientation = useRef(new Map());
+
+  const [isDraggingLine, setIsDraggingLine] = useState(false);
+  const [startNode, setStartNode] = useState(null);
+  const [currentLineEl, setCurrentLineEl] = useState(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
 
   // Custom hooks for managing audio and settings
   const { clickAudio, errorAudio, connectsuccess, perfectAudio} = useAudio();
@@ -128,7 +133,35 @@ function App() {
   //   console.log("Connection Groups",groupMapRef);
   // } , [connections]);
 
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if(isDraggingLine && currentLineEl) {
+        const svgRect = svgRef.current.getBoundingClientRect();
+        const mouseX = e.clientX - svgRect.left;
+        const mouseY = e.clientY - svgRect.top;
+        currentLineEl.setAttribute("x2", mouseX);
+        currentLineEl.setAttribute("y2", mouseY);
+      }
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [isDraggingLine, currentLineEl]);
 
+  useEffect(() => {
+    const handleMouseUp = () => {
+      if(isDraggingLine && !selectedNodes[1]) {
+        if (currentLineEl && svgRef.current.contains(currentLineEl)) {
+          svgRef.current.removeChild(currentLineEl);
+        }
+        setIsDraggingLine(false);
+        setStartNode(null);
+        setCurrentLineEl(null);
+      }
+    };
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => window.removeEventListener('mouseup', handleMouseUp);
+  }, [isDraggingLine, currentLineEl, selectedNodes]);
+  
   /**
    * Groups connections when a new connection pair is completed.
    */
@@ -219,7 +252,7 @@ function App() {
       if (selectedNodes.includes(nodeId)) {
         setSelectedNodes(selectedNodes.filter((id) => id !== nodeId));
         setHighlightedNodes([]); // Clear highlighted nodes
-      } 
+      }
       // If less than 2 nodes are selected, process the selection
       else if (selectedNodes.length < 2) {
         const newSelectedNodes = [...selectedNodes, nodeId];
@@ -229,8 +262,39 @@ function App() {
         if (newSelectedNodes.length === 1) {
           const connectedNodes = getConnectedNodes(nodeId, connectionPairs); // Use refined utility function
           setHighlightedNodes(connectedNodes); // Highlight nodes connected to the first selected node
+          setIsDraggingLine(true);
+          setStartNode(nodeId);
+      
+          const nodeElem = document.getElementById(nodeId);
+          const nodeRect = nodeElem.getBoundingClientRect();
+          const svgRect = svgRef.current.getBoundingClientRect();
+          const startX = nodeRect.left + nodeRect.width/2 - svgRect.left;
+          const startY = nodeRect.top + nodeRect.height/2 - svgRect.top;
+          
+          const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+          line.setAttribute("x1", startX);
+          line.setAttribute("y1", startY);
+          line.setAttribute("x2", startX);
+          line.setAttribute("y2", startY);
+          line.setAttribute("stroke","gray");
+          line.setAttribute("stroke-width","2");
+          line.setAttribute("stroke-dasharray","5,5");
+      
+          svgRef.current.appendChild(line);
+          setCurrentLineEl(line);
         }
-    
+        if (selectedNodes.length === 2 && isDraggingLine && startNode) {
+
+          tryConnect(newSelectedNodes);
+          if (currentLineEl && svgRef.current.contains(currentLineEl)) {
+            svgRef.current.removeChild(currentLineEl);
+          }
+          setIsDraggingLine(false);
+          setStartNode(null);
+          setCurrentLineEl(null);
+          setSelectedNodes([]);
+          setHighlightedNodes([]); // Clear highlights after a connection attempt
+        }
         // If two nodes are selected, attempt a connection
         if (newSelectedNodes.length === 2) {
           
