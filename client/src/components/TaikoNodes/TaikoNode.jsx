@@ -24,12 +24,13 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, positi
     //console.log(backgroundColor)
   }, [lightMode])
 
+  const classNames = `taiko-node ${entering ? 'taiko-node-enter' : ''}${isSelected ? ' selected' : ''}`;
 
   return (
     <div
       id={id}
       onClick={onClick}
-      className={`taiko-node ${entering ? 'taiko-node-enter' : ''}`}
+      className={classNames}
       style={{
         backgroundColor: isSelected
           ? "#FF69B4"
