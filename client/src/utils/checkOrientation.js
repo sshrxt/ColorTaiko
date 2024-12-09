@@ -7,7 +7,6 @@ export const checkOrientation = (newPair, groupMapRef, topOrientation, botOrient
   
     const topCombination = [top1, top2].sort().join(',');
     const bottomCombination = [bottom1, bottom2].sort().join(',');
-
     /*case 1
     */
     if (!topOrientation.current.has(topCombination) && !botOrientation.current.has(bottomCombination)) {
@@ -16,6 +15,7 @@ export const checkOrientation = (newPair, groupMapRef, topOrientation, botOrient
 
         if(top1 > top2) {
             topOrientation.current.set(topCombination, "left");
+            console.log("top1>top2")
             return 0;
         }
         if(bottom1 > bottom2) {
