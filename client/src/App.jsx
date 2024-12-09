@@ -63,48 +63,46 @@ function App() {
     // Get the last connection pair
     const lastConnectionPair = connectionPairs[connectionPairs.length - 1];
     
-    // Remove the last connection pair
-    setConnectionPairs(prev => prev.slice(0, -1));
-    
-    // Remove the last two connections from the connections array
-    setConnections(prev => {
-      const newConnections = [...prev];
-      if (lastConnectionPair.length === 2) {
-        // Remove the two connections in the last pair
-        newConnections.splice(newConnections.length - 2, 2);
-      } else if (lastConnectionPair.length === 1) {
-        // Remove the single connection
-        newConnections.pop();
-      }
-      return newConnections;
-    });
+    if (lastConnectionPair.length === 1) {
+      // If the last pair has only one connection, remove it completely
+      setConnectionPairs(prev => prev.slice(0, -1));
+      setConnections(prev => prev.slice(0, -1));
+      setEdgeState(null);
+    } else if (lastConnectionPair.length === 2) {
+      // If the last pair has two connections, remove only the last connection
+      const updatedConnectionPairs = [
+        ...connectionPairs.slice(0, -1),
+        [lastConnectionPair[0]]
+      ];
+      
+      setConnectionPairs(updatedConnectionPairs);
+      
+      // Remove the last connection from connections
+      setConnections(prev => prev.slice(0, -1));
+      
+      // Restore the edge state to the first connection in the pair
+      setEdgeState(lastConnectionPair[0]);
+      
+      // Reset orientation and group maps for the removed connection
+      const nodes = lastConnectionPair[1].nodes;
+      const topCombination = nodes
+        .filter(node => node.startsWith('top'))
+        .sort()
+        .join(',');
+      const bottomCombination = nodes
+        .filter(node => node.startsWith('bottom'))
+        .sort()
+        .join(',');
   
-    // Reset edge state
-    setEdgeState(null);
+      // Remove orientation for this specific combination
+      topOrientation.current.delete(topCombination);
+      botOrientation.current.delete(bottomCombination);
   
-    // Reset orientation and group maps for the removed connections
-    if (lastConnectionPair.length === 2) {
-      lastConnectionPair.forEach(connection => {
-        const nodes = connection.nodes;
-        const topCombination = nodes
-          .filter(node => node.startsWith('top'))
-          .sort()
-          .join(',');
-        const bottomCombination = nodes
-          .filter(node => node.startsWith('bottom'))
-          .sort()
-          .join(',');
-  
-        // Remove orientation for this specific combination
-        topOrientation.current.delete(topCombination);
-        botOrientation.current.delete(bottomCombination);
-  
-        // Remove the corresponding group from groupMapRef
-        groupMapRef.current.delete(topCombination);
-      });
+      // Remove the corresponding group from groupMapRef
+      groupMapRef.current.delete(topCombination);
     }
   
-    // Recalculate connection groups (this might need to be more sophisticated)
+    // Recalculate connection groups
     setConnectionGroups(prevGroups => {
       // Remove the last group or modify as needed
       return prevGroups.slice(0, -1);
