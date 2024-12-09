@@ -67,9 +67,11 @@ export const checkOrientation = (newPair, groupMapRef, topOrientation, botOrient
             return 0;
         }
 
-        if (topGroup === bottomGroup) {
-            return -1;
-        }
+        // Remove this block that was returning -1
+        // if (topGroup === bottomGroup) {
+        //     return -1;
+        // }
+
         const topDir = topOrientation.current.get(topCombination);
         console.log(topDir);
         const botDir = botOrientation.current.get(bottomCombination);
@@ -94,5 +96,8 @@ export const checkOrientation = (newPair, groupMapRef, topOrientation, botOrient
     
         return 0;
     }
+
+    // Add a default return at the end
+    return 0;
 };
 
