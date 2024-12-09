@@ -56,6 +56,93 @@ function App() {
   const [welcomeMessage, setWelcomeMessage] = useState(false);
   const [Percent100Message, setPercent100Message] = useState(false);
 
+
+  const handleUndo = () => {
+    if (connectionPairs.length === 0) return;
+  
+    // Get the last connection pair
+    const lastConnectionPair = connectionPairs[connectionPairs.length - 1];
+    
+    // Remove the last connection pair
+    setConnectionPairs(prev => prev.slice(0, -1));
+    
+    // Remove the last two connections from the connections array
+    setConnections(prev => {
+      const newConnections = [...prev];
+      if (lastConnectionPair.length === 2) {
+        // Remove the two connections in the last pair
+        newConnections.splice(newConnections.length - 2, 2);
+      } else if (lastConnectionPair.length === 1) {
+        // Remove the single connection
+        newConnections.pop();
+      }
+      return newConnections;
+    });
+  
+    // Reset edge state
+    setEdgeState(null);
+  
+    // Reset orientation and group maps for the removed connections
+    if (lastConnectionPair.length === 2) {
+      lastConnectionPair.forEach(connection => {
+        const nodes = connection.nodes;
+        const topCombination = nodes
+          .filter(node => node.startsWith('top'))
+          .sort()
+          .join(',');
+        const bottomCombination = nodes
+          .filter(node => node.startsWith('bottom'))
+          .sort()
+          .join(',');
+  
+        // Remove orientation for this specific combination
+        topOrientation.current.delete(topCombination);
+        botOrientation.current.delete(bottomCombination);
+  
+        // Remove the corresponding group from groupMapRef
+        groupMapRef.current.delete(topCombination);
+      });
+    }
+  
+    // Recalculate connection groups (this might need to be more sophisticated)
+    setConnectionGroups(prevGroups => {
+      // Remove the last group or modify as needed
+      return prevGroups.slice(0, -1);
+    });
+  
+    // Reduce node rows if necessary
+    const checkReduceNodes = () => {
+      const currentTopNodes = new Set(
+        connections.flatMap(conn => 
+          conn.nodes.filter(node => node.startsWith('top'))
+        )
+      );
+      const currentBottomNodes = new Set(
+        connections.flatMap(conn => 
+          conn.nodes.filter(node => node.startsWith('bottom'))
+        )
+      );
+  
+      const maxTopNodeIndex = Math.max(
+        ...[...currentTopNodes].map(node => 
+          parseInt(node.split('-')[1])
+        ),
+        -1
+      );
+      const maxBottomNodeIndex = Math.max(
+        ...[...currentBottomNodes].map(node => 
+          parseInt(node.split('-')[1])
+        ),
+        -1
+      );
+  
+      setTopRowCount(Math.max(maxTopNodeIndex + 1, 1));
+      setBottomRowCount(Math.max(maxBottomNodeIndex + 1, 1));
+    };
+  
+    checkReduceNodes();
+  };
+
   /**
    * Sets welcome message visibility based on the number of nodes in each row.
    */
@@ -174,7 +261,7 @@ function App() {
     if (latestPair && latestPair.length === 2) {
       const a = checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation);
       if(a == -1){
-        setErrorMessage("You are not allow to do that");
+        setErrorMessage("You are not allowed to do that");
         setSelectedNodes([]);
         return;
       }
@@ -483,9 +570,14 @@ function App() {
         />
       )}
   
-      <button onClick={handleClear} className="clear-button">
-        Clear
-      </button>
+
+    <button onClick={handleClear} className="clear-button">
+      Clear
+    </button>
+    <button onClick={handleUndo} className="undo-button">
+      Undo
+    </button>
+   
  
       <ErrorModal
         className="error-container"

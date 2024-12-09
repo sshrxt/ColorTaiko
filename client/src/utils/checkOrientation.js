@@ -66,7 +66,6 @@ export const checkOrientation = (newPair, groupMapRef, topOrientation, botOrient
             console.error("One of the groups is missing in groupMapRef");
             return 0;
         }
-    
         const topDir = topOrientation.current.get(topCombination);
         const botDir = botOrientation.current.get(bottomCombination);
     
@@ -94,6 +93,5 @@ export const checkOrientation = (newPair, groupMapRef, topOrientation, botOrient
     
         return 0;
     }
-    return 0;    
 };
 
