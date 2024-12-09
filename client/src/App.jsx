@@ -263,6 +263,7 @@ function App() {
       if(a == -1){
         setErrorMessage("You are not allowed to do that");
         setSelectedNodes([]);
+        handleUndo()
         return;
       }
 

@@ -7,7 +7,6 @@ export const checkOrientation = (newPair, groupMapRef, topOrientation, botOrient
   
     const topCombination = [top1, top2].sort().join(',');
     const bottomCombination = [bottom1, bottom2].sort().join(',');
-
     /*case 1
     */
     if (!topOrientation.current.has(topCombination) && !botOrientation.current.has(bottomCombination)) {
@@ -16,6 +15,7 @@ export const checkOrientation = (newPair, groupMapRef, topOrientation, botOrient
 
         if(top1 > top2) {
             topOrientation.current.set(topCombination, "left");
+            console.log("top1>top2")
             return 0;
         }
         if(bottom1 > bottom2) {
@@ -58,7 +58,7 @@ export const checkOrientation = (newPair, groupMapRef, topOrientation, botOrient
 
     /*case 4
     */
-    if(topOrientation.current.get(topCombination) && botOrientation.current.get(bottomCombination)) {
+    if (topOrientation.current.get(topCombination) && botOrientation.current.get(bottomCombination)) {
         const topGroup = groupMapRef.current.get(topCombination);
         const bottomGroup = groupMapRef.current.get(bottomCombination);
     
@@ -66,22 +66,20 @@ export const checkOrientation = (newPair, groupMapRef, topOrientation, botOrient
             console.error("One of the groups is missing in groupMapRef");
             return 0;
         }
-
-        // Remove this block that was returning -1
-        // if (topGroup === bottomGroup) {
-        //     return -1;
-        // }
-
         const topDir = topOrientation.current.get(topCombination);
-        console.log(topDir);
         const botDir = botOrientation.current.get(bottomCombination);
-        console.log(botDir);
+    
         const isCrossed = (bottom1 < bottom2 && top1 > top2) || (bottom1 > bottom2 && top1 < top2);
-
-        if (isCrossed) {
-            // 需要翻转 topGroup 中所有 combination 的方向
+        const sameDirection = (topDir === botDir);
+    
+        const shouldFlip = (sameDirection && isCrossed) || (!sameDirection && !isCrossed);
+    
+        if (shouldFlip) {
+            if (topGroup === bottomGroup) {
+                return -1;
+            }
+    
             for (const combo of topGroup.combinations) {
-                console.log(combo);
                 if (topOrientation.current.has(combo)) {
                     const dir = topOrientation.current.get(combo);
                     topOrientation.current.set(combo, dir === "right" ? "left" : "right");
@@ -91,13 +89,9 @@ export const checkOrientation = (newPair, groupMapRef, topOrientation, botOrient
                     botOrientation.current.set(combo, dir === "right" ? "left" : "right");
                 }
             }
-            return 0;
         }
     
         return 0;
     }
-
-    // Add a default return at the end
-    return 0;
 };
 
