@@ -108,7 +108,7 @@ body {
 }
 
 @media (max-width: 850px) {
-  .clear-button {
+  .button-container {
     margin-top: 70px;
   }
   .icon {
@@ -120,9 +120,24 @@ body {
   }
 }
 
+
+
 .clear-button {
   position: absolute;
   top: 10px;
+  right: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.undo-button {
+  position: absolute;
+  top: 60px;
   right: 10px;
   padding: 10px 20px;
   font-size: 16px;
