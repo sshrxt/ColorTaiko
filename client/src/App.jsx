@@ -86,25 +86,31 @@ function App() {
     if (lastConnectionPair.length === 2) {
       lastConnectionPair.forEach(connection => {
         const nodes = connection.nodes;
-        nodes.forEach(node => {
-          if (node.startsWith('top')) {
-            topOrientation.current.delete(node);
-          } else if (node.startsWith('bottom')) {
-            botOrientation.current.delete(node);
-          }
-        });
+        const topCombination = nodes
+          .filter(node => node.startsWith('top'))
+          .sort()
+          .join(',');
+        const bottomCombination = nodes
+          .filter(node => node.startsWith('bottom'))
+          .sort()
+          .join(',');
+  
+        // Remove orientation for this specific combination
+        topOrientation.current.delete(topCombination);
+        botOrientation.current.delete(bottomCombination);
+  
+        // Remove the corresponding group from groupMapRef
+        groupMapRef.current.delete(topCombination);
       });
-      
-      // Clear the corresponding entry in the group map
-      groupMapRef.current.delete(lastConnectionPair[0].nodes.sort().join('-'));
     }
   
-    // Completely reset connection groups
-    setConnectionGroups([]);
+    // Recalculate connection groups (this might need to be more sophisticated)
+    setConnectionGroups(prevGroups => {
+      // Remove the last group or modify as needed
+      return prevGroups.slice(0, -1);
+    });
   
-    // Optional: Reset orientation check flags if they exist
-    // You might want to add a method to reset any internal state in checkOrientation
-    
+    // Reduce node rows if necessary
     const checkReduceNodes = () => {
       const currentTopNodes = new Set(
         connections.flatMap(conn => 
