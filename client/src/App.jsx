@@ -272,7 +272,7 @@ function App() {
       if(level === "Level 2") {
         const a = checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation);
         if(a == -1){
-          setErrorMessage("You are not allowed to do that");
+          setErrorMessage("Orientation condition failed!");
           setSelectedNodes([]);
           handleUndo()
           return;
