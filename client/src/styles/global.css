@@ -97,6 +97,7 @@ body {
   text-align: center;
   position: relative;
   font-family: Arial, sans-serif;
+  color: white;
 }
 
 .icon {
@@ -163,8 +164,8 @@ body {
 
 .level-selector {
   position: absolute;
-  top: 110px;
-  right: 10px;
+  top: 15px;
+  right: 250px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
