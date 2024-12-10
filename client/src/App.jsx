@@ -6,6 +6,7 @@ import { checkAndGroupConnections } from "./utils/MergeUtils";
 import { calculateProgress } from "./utils/calculateProgress";
 import { checkAndAddNewNodes} from "./utils/checkAndAddNewNodes";
 import { getConnectedNodes } from "./utils/getConnectedNodes";
+import { checkOrientation } from "./utils/checkOrientation";
 
 import SettingIconImage from "./assets/setting-icon.png";
 
@@ -16,7 +17,6 @@ import ProgressBar from "./components/ProgressBar/progressBar";
 import Title from "./components/title";
 import { useAudio } from './hooks/useAudio';
 import { useSettings } from './hooks/useSetting';
-
 
 
 function App() {
@@ -36,6 +36,26 @@ function App() {
   const groupMapRef = useRef(new Map());
   const previousProgressRef = useRef(progress);
   const [highlightedNodes, setHighlightedNodes] = useState([]);
+  const topOrientation = useRef(new Map());
+  const botOrientation = useRef(new Map());
+
+  const [isDraggingLine, setIsDraggingLine] = useState(false);
+  const [startNode, setStartNode] = useState(null);
+  const [currentLineEl, setCurrentLineEl] = useState(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [level, setLevel] = useState("level")
+
+
+  const [selectedLevel, setSelectedLevel] = useState(null);
+  const [isDropdownDisabled, setIsDropdownDisabled] = useState(false);
+
+  const handleLevelChange = (event) => {
+    setSelectedLevel(event.target.value);
+    setLevel(event.target.value)
+    setIsDropdownDisabled(true); // Disable dropdown after selection
+  };
+  
+
 
   // Custom hooks for managing audio and settings
   const { clickAudio, errorAudio, connectsuccess, perfectAudio} = useAudio();
@@ -47,6 +67,91 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [welcomeMessage, setWelcomeMessage] = useState(false);
   const [Percent100Message, setPercent100Message] = useState(false);
+
+
+  const handleUndo = () => {
+    if (connectionPairs.length === 0) return;
+  
+    // Get the last connection pair
+    const lastConnectionPair = connectionPairs[connectionPairs.length - 1];
+    
+    if (lastConnectionPair.length === 1) {
+      // If the last pair has only one connection, remove it completely
+      setConnectionPairs(prev => prev.slice(0, -1));
+      setConnections(prev => prev.slice(0, -1));
+      setEdgeState(null);
+    } else if (lastConnectionPair.length === 2) {
+      // If the last pair has two connections, remove only the last connection
+      const updatedConnectionPairs = [
+        ...connectionPairs.slice(0, -1),
+        [lastConnectionPair[0]]
+      ];
+      
+      setConnectionPairs(updatedConnectionPairs);
+      
+      // Remove the last connection from connections
+      setConnections(prev => prev.slice(0, -1));
+      
+      // Restore the edge state to the first connection in the pair
+      setEdgeState(lastConnectionPair[0]);
+      
+      // Reset orientation and group maps for the removed connection
+      const nodes = lastConnectionPair[1].nodes;
+      const topCombination = nodes
+        .filter(node => node.startsWith('top'))
+        .sort()
+        .join(',');
+      const bottomCombination = nodes
+        .filter(node => node.startsWith('bottom'))
+        .sort()
+        .join(',');
+  
+      // Remove orientation for this specific combination
+      topOrientation.current.delete(topCombination);
+      botOrientation.current.delete(bottomCombination);
+  
+      // Remove the corresponding group from groupMapRef
+      groupMapRef.current.delete(topCombination);
+    }
+  
+    // Recalculate connection groups
+    setConnectionGroups(prevGroups => {
+      // Remove the last group or modify as needed
+      return prevGroups.slice(0, -1);
+    });
+  
+    // Reduce node rows if necessary
+    const checkReduceNodes = () => {
+      const currentTopNodes = new Set(
+        connections.flatMap(conn => 
+          conn.nodes.filter(node => node.startsWith('top'))
+        )
+      );
+      const currentBottomNodes = new Set(
+        connections.flatMap(conn => 
+          conn.nodes.filter(node => node.startsWith('bottom'))
+        )
+      );
+  
+      const maxTopNodeIndex = Math.max(
+        ...[...currentTopNodes].map(node => 
+          parseInt(node.split('-')[1])
+        ),
+        -1
+      );
+      const maxBottomNodeIndex = Math.max(
+        ...[...currentBottomNodes].map(node => 
+          parseInt(node.split('-')[1])
+        ),
+        -1
+      );
+  
+      setTopRowCount(Math.max(maxTopNodeIndex + 1, 1));
+      setBottomRowCount(Math.max(maxBottomNodeIndex + 1, 1));
+    };
+  
+    checkReduceNodes();
+  };
 
   /**
    * Sets welcome message visibility based on the number of nodes in each row.
@@ -62,7 +167,7 @@ function App() {
    * Draws connections on the SVG element when related state changes.
    */
   useEffect(() => {
-    drawConnections(svgRef, connections, connectionPairs, offset);
+    drawConnections(svgRef, connections, connectionPairs, offset, topOrientation, botOrientation);
   }, [connectionGroups, connections, topRowCount, bottomRowCount, connectionPairs, offset]);
 
   /**
@@ -119,18 +224,61 @@ function App() {
    * for debugging purposes
    */
 
+  // useEffect(() => {
+  //   console.log("Connections",connections);
+  //   console.log("Connection Pairs",connectionPairs);
+  //   console.log("Connection Groups",groupMapRef);
+  // } , [connections]);
+
   useEffect(() => {
-    console.log("Connections",connections);
-    console.log("Connection Pairs",connectionPairs);
-  } , [connections]);
+    const handleMouseMove = (e) => {
+      if(isDraggingLine && currentLineEl) {
+        const svgRect = svgRef.current.getBoundingClientRect();
+        const mouseX = e.clientX - svgRect.left;
+        const mouseY = e.clientY - svgRect.top;
+        currentLineEl.setAttribute("x2", mouseX);
+        currentLineEl.setAttribute("y2", mouseY);
+      }
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [isDraggingLine, currentLineEl]);
 
-
+  useEffect(() => {
+    const handleMouseUp = () => {
+      if(isDraggingLine && !selectedNodes[1]) {
+        if (currentLineEl && svgRef.current.contains(currentLineEl)) {
+          svgRef.current.removeChild(currentLineEl);
+        }
+        setIsDraggingLine(false);
+        setStartNode(null);
+        setCurrentLineEl(null);
+      }
+    };
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => window.removeEventListener('mouseup', handleMouseUp);
+  }, [isDraggingLine, currentLineEl, selectedNodes]);
+  
   /**
    * Groups connections when a new connection pair is completed.
    */
   useEffect(() => {
     const latestPair = connectionPairs[connectionPairs.length - 1];
+    // if(groupMapRef.current.size === 0) {
+
+    // }
+
     if (latestPair && latestPair.length === 2) {
+      if(level === "Level 2") {
+        const a = checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation);
+        if(a == -1){
+          setErrorMessage("You are not allowed to do that");
+          setSelectedNodes([]);
+          handleUndo()
+          return;
+        }
+      }
+
       checkAndGroupConnections(
         latestPair,
         groupMapRef,
@@ -139,7 +287,34 @@ function App() {
         setConnections
       );
     }
+    console.log("topOrientation",topOrientation);
+    console.log("botOrientation",botOrientation);
+    console.log("groupMapRef",groupMapRef);
   }, [connectionPairs]);
+
+  // useEffect(() => {
+  //   const latestPair = connectionPairs[connectionPairs.length - 1];)
+  //   if (latestPair && latestPair.length === 2){
+  //     checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation);
+  //     if(checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation) == 1){
+  //       setErrorMessage("Flip");
+  //     } else if (checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation) == 2){
+  //       setErrorMessage("Gnorw");
+  //     }
+  //   }
+
+  //   console.log(topOrientation);
+  //   console.log(botOrientation);
+  // }, [connectionPairs]);
+
+  // useEffect(() => {
+  //   if(level === "level1") {
+  //     setLevel("level2")
+  //   }
+  //   else {
+  //     setLevel("level1")
+  //   }
+  // }, [level])
 
   const createTopRow = (count) =>
     Array.from({ length: count }, (_, i) => (
@@ -180,12 +355,19 @@ function App() {
     
       // Play click audio if sound is enabled
       if (soundBool) clickAudio.play();
+
+      if(selectedLevel == null) {
+        setErrorMessage("Please select a level and try again!!!!")
+      }
+      else {
+
+      
     
       // If the node is already selected, deselect it and clear highlights
       if (selectedNodes.includes(nodeId)) {
         setSelectedNodes(selectedNodes.filter((id) => id !== nodeId));
         setHighlightedNodes([]); // Clear highlighted nodes
-      } 
+      }
       // If less than 2 nodes are selected, process the selection
       else if (selectedNodes.length < 2) {
         const newSelectedNodes = [...selectedNodes, nodeId];
@@ -195,14 +377,47 @@ function App() {
         if (newSelectedNodes.length === 1) {
           const connectedNodes = getConnectedNodes(nodeId, connectionPairs); // Use refined utility function
           setHighlightedNodes(connectedNodes); // Highlight nodes connected to the first selected node
+          setIsDraggingLine(true);
+          setStartNode(nodeId);
+      
+          const nodeElem = document.getElementById(nodeId);
+          const nodeRect = nodeElem.getBoundingClientRect();
+          const svgRect = svgRef.current.getBoundingClientRect();
+          const startX = nodeRect.left + nodeRect.width/2 - svgRect.left;
+          const startY = nodeRect.top + nodeRect.height/2 - svgRect.top;
+          
+          const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+          line.setAttribute("x1", startX);
+          line.setAttribute("y1", startY);
+          line.setAttribute("x2", startX);
+          line.setAttribute("y2", startY);
+          line.setAttribute("stroke","gray");
+          line.setAttribute("stroke-width","2");
+          line.setAttribute("stroke-dasharray","5,5");
+      
+          svgRef.current.appendChild(line);
+          setCurrentLineEl(line);
         }
-    
+        if (selectedNodes.length === 2 && isDraggingLine && startNode) {
+
+          tryConnect(newSelectedNodes);
+          if (currentLineEl && svgRef.current.contains(currentLineEl)) {
+            svgRef.current.removeChild(currentLineEl);
+          }
+          setIsDraggingLine(false);
+          setStartNode(null);
+          setCurrentLineEl(null);
+          setSelectedNodes([]);
+          setHighlightedNodes([]); // Clear highlights after a connection attempt
+        }
         // If two nodes are selected, attempt a connection
         if (newSelectedNodes.length === 2) {
+          
           tryConnect(newSelectedNodes);
           setHighlightedNodes([]); // Clear highlights after a connection attempt
         }
       }
+    }
     };
 
   const handleToolMenuClick = () => setShowSettings((prev) => !prev);
@@ -219,6 +434,8 @@ function App() {
     setConnectionGroups([]);
     setCurrentColor(0);
     groupMapRef.current.clear();
+    topOrientation.current.clear();
+    botOrientation.current.clear();
     console.log(connectionPairs);
   };
 
@@ -240,7 +457,6 @@ function App() {
   const toggleLightMode = () => {
     setLightMode((prevMode) => !prevMode);
   };
-
 
 
   const tryConnect = (nodes) => {
@@ -383,9 +599,38 @@ function App() {
         />
       )}
   
-      <button onClick={handleClear} className="clear-button">
-        Clear
-      </button>
+
+    <button onClick={handleClear} className="clear-button">
+      Clear
+    </button>
+    <button onClick={handleUndo} className="undo-button">
+      Undo
+    </button>
+    {!selectedLevel ? (
+        <div className="level-selector">
+          <select
+            id="level-dropdown"
+            onChange={handleLevelChange}
+            disabled={isDropdownDisabled}
+            className="level-dropdown"
+          >
+            <option value="" disabled selected>
+              Choose a level
+            </option>
+            <option value="Level 1">Level 1</option>
+            <option value="Level 2">Level 2</option>
+          </select>
+        </div>
+      ) : (
+        <div
+          className="level-selected"
+          style={{ color: lightMode ? 'black' : 'white' }}
+        >
+          Selected Level: {selectedLevel}
+        </div>
+
+      )}
+   
  
       <ErrorModal
         className="error-container"
