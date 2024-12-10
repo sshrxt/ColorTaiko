@@ -2,11 +2,23 @@ export const checkOrientation = (newPair, groupMapRef, topOrientation, botOrient
     if (newPair.length !== 2) return;
 
     const [firstConnection, secondConnection] = newPair;
-    const [top1, bottom1] = firstConnection.nodes;
-    const [top2, bottom2] = secondConnection.nodes;
-  
-    const topCombination = [top1, top2].sort().join(',');
-    const bottomCombination = [bottom1, bottom2].sort().join(',');
+    let [top1_, bottom1_] = firstConnection.nodes;
+    let [top2_, bottom2_] = secondConnection.nodes;
+
+    const getNodeNumber = (nodeId) => {
+        const parts = nodeId.split('-');
+        return parseInt(parts[1], 10);
+    };
+    
+
+    const topCombination = [top1_, top2_].sort().join(',');
+    const bottomCombination = [bottom1_, bottom2_].sort().join(',');
+
+    const top1 = getNodeNumber(top1_)
+    const top2 = getNodeNumber(top2_)
+    const bottom1 = getNodeNumber(bottom1_)
+    const bottom2 = getNodeNumber(bottom2_)
+
     /*case 1
     */
     if (!topOrientation.current.has(topCombination) && !botOrientation.current.has(bottomCombination)) {
@@ -15,12 +27,9 @@ export const checkOrientation = (newPair, groupMapRef, topOrientation, botOrient
 
         if(top1 > top2) {
             topOrientation.current.set(topCombination, "left");
-            console.log("top1>top2")
-            return 0;
         }
         if(bottom1 > bottom2) {
             botOrientation.current.set(bottomCombination, "left");
-            return 0;
         }
         return 0;
     }
