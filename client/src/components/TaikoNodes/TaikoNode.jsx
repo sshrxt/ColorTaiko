@@ -12,13 +12,13 @@ const TaikoNode = ({ id, onClick, isSelected, index, totalCount, isFaded, positi
 
   const nodeSize = Math.max(30, 100 / totalCount);
   const label = position === "top" ? `b${index + 1}` : `a${index + 1}`;
-  const [backgroundColor, setBackgroundColor] = useState("black")
+  const [backgroundColor, setBackgroundColor] = useState("red")
 
   useEffect(()=> {
-    if(backgroundColor == "white"){
-      setBackgroundColor('black')
+    if(lightMode == true) {
+      setBackgroundColor("black")
     }
-    else{
+    else {
       setBackgroundColor("white")
     }
     //console.log(backgroundColor)

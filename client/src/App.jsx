@@ -43,6 +43,18 @@ function App() {
   const [startNode, setStartNode] = useState(null);
   const [currentLineEl, setCurrentLineEl] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [level, setLevel] = useState("level")
+
+
+  const [selectedLevel, setSelectedLevel] = useState(null);
+  const [isDropdownDisabled, setIsDropdownDisabled] = useState(false);
+
+  const handleLevelChange = (event) => {
+    setSelectedLevel(event.target.value);
+    setLevel(event.target.value)
+    setIsDropdownDisabled(true); // Disable dropdown after selection
+  };
+  
 
 
   // Custom hooks for managing audio and settings
@@ -257,12 +269,14 @@ function App() {
     // }
 
     if (latestPair && latestPair.length === 2) {
-      const a = checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation);
-      if(a == -1){
-        setErrorMessage("You are not allowed to do that");
-        setSelectedNodes([]);
-        handleUndo()
-        return;
+      if(level === "Level 2") {
+        const a = checkOrientation(latestPair, groupMapRef, topOrientation, botOrientation);
+        if(a == -1){
+          setErrorMessage("You are not allowed to do that");
+          setSelectedNodes([]);
+          handleUndo()
+          return;
+        }
       }
 
       checkAndGroupConnections(
@@ -293,6 +307,14 @@ function App() {
   //   console.log(botOrientation);
   // }, [connectionPairs]);
 
+  // useEffect(() => {
+  //   if(level === "level1") {
+  //     setLevel("level2")
+  //   }
+  //   else {
+  //     setLevel("level1")
+  //   }
+  // }, [level])
 
   const createTopRow = (count) =>
     Array.from({ length: count }, (_, i) => (
@@ -333,6 +355,10 @@ function App() {
     
       // Play click audio if sound is enabled
       if (soundBool) clickAudio.play();
+
+      if(selectedLevel == null) {
+        setErrorMessage("Please select a level and try again!!!!")
+      }
     
       // If the node is already selected, deselect it and clear highlights
       if (selectedNodes.includes(nodeId)) {
@@ -576,6 +602,26 @@ function App() {
     <button onClick={handleUndo} className="undo-button">
       Undo
     </button>
+    {!selectedLevel ? (
+        <div className="level-selector">
+          <select
+            id="level-dropdown"
+            onChange={handleLevelChange}
+            disabled={isDropdownDisabled}
+            className="level-dropdown"
+          >
+            <option value="" disabled selected>
+              Choose a level
+            </option>
+            <option value="Level 1">Level 1</option>
+            <option value="Level 2">Level 2</option>
+          </select>
+        </div>
+      ) : (
+        <div className="level-selected">
+          Selected Level: {selectedLevel}
+        </div>
+      )}
    
  
       <ErrorModal
