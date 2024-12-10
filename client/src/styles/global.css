@@ -109,8 +109,13 @@ body {
 }
 
 @media (max-width: 850px) {
-  .button-container {
-    margin-top: 70px;
+  .clear-button {
+    margin-top: 60px;
+    right: 10px;
+  }
+  .undo-button {
+    margin-top: 60px;
+    right: 10px;
   }
   .icon {
     margin-top: 70px;
@@ -118,6 +123,20 @@ body {
   }
   .game-box {
     margin-top: 70px;
+  }
+}
+@media (max-width: 1300px){
+  .level-selector {
+    margin-top: 120px;
+    margin-left: 0px;
+    left: 0;
+    right: auto;
+  }
+  .level-selected {
+    margin-top: 20px;
+    margin-left: 0px;
+    left: 0;
+    right: 0;
   }
 }
 
@@ -195,6 +214,7 @@ body {
   position: absolute;
   top: 110px;
   right: 10px;
+  display: flex;
   font-size: 16px;
   color: black;
   font-weight: bold;
