@@ -40,18 +40,18 @@ const ProgressBar = ({ progress, connections, topRowCount, bottomRowCount, light
           className="tooltip"
           style={{ top: tooltipPosition.y + 10, left: tooltipPosition.x + 10 }}
         >
-          <p>Vertical Edges: {connections.length}</p>
-          <p>Top Nodes: {topRowCount - 1}</p>
-          <p>Bottom Nodes: {bottomRowCount - 1}</p>
-          <p style={{ color: 'white', fontSize: '12px', textAlign: 'left', marginTop: '0px', marginBottom: '-20px' }}>
-            Success: 
+          <p>vertical edges: {connections.length}</p>
+          <p>top vertices: {topRowCount - 1}</p>
+          <p>bottom vertices: {bottomRowCount - 1}</p>
+          <p style={{ color: 'white', fontSize: '12px', textAlign: 'left', marginTop: '0px', marginBottom: '-20px', marginRight: "5px" }}>
+            success:   
             <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>
               <span style={{ display: 'block', textAlign: 'center' }}>{connections.length}</span>
-              <span style={{ display: 'block', borderTop: lightMode ? '1px solid black' : '1px solid white', paddingTop: '2px', textAlign: 'center' }}>
+              <span style={{ display: 'block', borderTop: lightMode ? '1px solid white' : '1px solid white', paddingTop: '2px', textAlign: 'center' }}>
                 ({topRowCount - 1} × {bottomRowCount - 1})
               </span>
             </span>
-            <span style={{ marginLeft: '5px' }}>= {connections.length / ((topRowCount - 1) * (bottomRowCount - 1))}</span>
+            <span style={{ marginLeft: '10px' }}>= %{Number((connections.length / ((topRowCount - 1) * (bottomRowCount - 1))) * 100).toPrecision(4)}</span>
           </p>
           
 

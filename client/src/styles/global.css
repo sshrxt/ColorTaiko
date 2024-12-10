@@ -148,6 +148,63 @@ body {
   cursor: pointer;
 }
 
+.undo-button {
+  position: absolute;
+  top: 60px;
+  right: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.level-selector {
+  position: absolute;
+  top: 110px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  z-index: 1000; /* Ensure dropdown is visible */
+}
+
+.level-label {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.level-dropdown {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+.level-dropdown:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+.level-selected {
+  position: absolute;
+  top: 110px;
+  right: 10px;
+  font-size: 16px;
+  color: black;
+  font-weight: bold;
+}
+
+
+
+
+
+
+
 .svg-overlay {
   position: absolute;
   top: 0;

@@ -18,7 +18,7 @@ export function useSettings() {
 
   const [lightMode, setLightMode] = useState(() => {
     const savedLightMode = localStorage.getItem("lightMode");
-    return savedLightMode ? JSON.parse(savedLightMode) : false;
+    return savedLightMode ? JSON.parse(savedLightMode) : true;
   });
 
   useEffect(() => {

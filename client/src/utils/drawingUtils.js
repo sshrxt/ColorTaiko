@@ -170,11 +170,7 @@ export const drawConnections = (svgRef, connections, connectionPairs, offset, to
             ${midX + arrowSize},${midY} 
             ${midX},${midY + arrowSize}`;
         } else {
-          // Default arrow pointing up
-          arrowPoints = `
-            ${midX - arrowSize},${midY + arrowSize} 
-            ${midX + arrowSize},${midY + arrowSize} 
-            ${midX},${midY - arrowSize}`;
+         
         }
         arrow.setAttribute("points", arrowPoints);
         arrow.setAttribute("fill", color);
