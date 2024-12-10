@@ -359,6 +359,9 @@ function App() {
       if(selectedLevel == null) {
         setErrorMessage("Please select a level and try again!!!!")
       }
+      else {
+
+      
     
       // If the node is already selected, deselect it and clear highlights
       if (selectedNodes.includes(nodeId)) {
@@ -414,6 +417,7 @@ function App() {
           setHighlightedNodes([]); // Clear highlights after a connection attempt
         }
       }
+    }
     };
 
   const handleToolMenuClick = () => setShowSettings((prev) => !prev);
