@@ -618,9 +618,13 @@ function App() {
           </select>
         </div>
       ) : (
-        <div className="level-selected">
+        <div
+          className="level-selected"
+          style={{ color: lightMode ? 'black' : 'white' }}
+        >
           Selected Level: {selectedLevel}
         </div>
+
       )}
    
  
